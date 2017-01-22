@@ -8,6 +8,8 @@ that I took as screenshots manually, and must save the following numpy arrays:
 - X_valid and y_valid
 - X_test and y_test
 
+in the `data_for_net` directory.
+
 I'm not sure if we need validation right now but it doens't hurt to have one. If
 we don't want it, then combine the train and valid stuff in the other scripts I
 use before testing.
@@ -78,7 +80,7 @@ def sanity_checks(data_dirs):
         print("low ratio: {}".format(np.where(dim_ratio < 0.6)[0]))
 
 
-def load_and_save(data_dirs):
+def load_and_save(data_dirs, height=32, width=32):
     """ Now actually load the data into the numpy arrays. Also do preprocessing
     here to zero-mean things, etc. We will _not_ do data augmentation here. 
     """
@@ -86,9 +88,11 @@ def load_and_save(data_dirs):
 
 
 if __name__ == "__main__":
-    data_dirs = ['im_left_deformed',
-                 'im_right_deformed',
-                 'im_left_normal',
-                 'im_right_normal']
+    data_dirs = ['data_raw/im_left_deformed',
+                 'data_raw/im_right_deformed',
+                 'data_raw/im_left_normal',
+                 'data_raw/im_right_normal']
     #sanity_checks(data_dirs)
-    load_and_save(data_dirs)
+    height = 32
+    width = 32
+    load_and_save(data_dirs, height=height, width=width)

@@ -42,11 +42,11 @@ repository. This will do the following main steps:
 
 - Check all images for size and height/width sanity checks.
 
-  - Note: I have a method which lets me list unusual file sizes first. This lets
-    me manually delete images by looking up their index. I can do this with the
-    command `ls -lh > test.txt` and then inspect `test.txt` using vim with line
-    indices (be sure to add one since it starts from zero). Yeah, this is a bit
-    manual but it's probably best to catch these cases early.
+  - To be specific, I can detect the *indices* of the screenshots with unusual
+    heights, widths, or height/width ratios. Then I can find them manually and
+    get rid of them. I can find the index of files with the command `ls -lh >
+    test.txt` and then inspect `test.txt` using vim with line indices (be sure
+    to add one since it starts from zero).
 
 - Resize images to be the same size, then shuffle into train/test.
 
