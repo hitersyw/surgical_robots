@@ -8,7 +8,7 @@ that I took as screenshots manually, and must save the following numpy arrays:
 - X_valid and y_valid
 - X_test and y_test
 
-in the `data_for_net` directory.
+in the `fina_data` directory.
 
 I'm not sure if we need validation right now but it doens't hurt to have one. If
 we don't want it, then combine the train and valid stuff in the other scripts I
