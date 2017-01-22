@@ -1,0 +1,88 @@
+Daniel's note: this is the process_data script run with the inspection step. I
+used this to explicitly delete several of the images with skewed shapes, most
+notably those from the im_left_deformed since those were what I did first and I
+had to experiment a bit. But these statistics should be useful. There are now no
+special images to detect. Thresholds:
+
+width/height: must be both less than 600
+ratios: must be between 0.6 and 1.4
+----
+
+
+
+
+
+KEY = im_right_normal with 327 images:
+	mean [ 306.6116208   322.85626911]
+	min [188 202]
+	max [444 448]
+	std [ 41.09531235  38.71894512]
+
+now dimension ratios:
+	mean 0.9526
+	min 0.6188
+	max 1.2500
+	std 0.0934
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []
+
+
+KEY = im_left_normal with 301 images:
+	mean [ 316.23920266  334.93023256]
+	min [198 178]
+	max [424 466]
+	std [ 35.42615629  36.01603255]
+
+now dimension ratios:
+	mean 0.9462
+	min 0.7753
+	max 1.1948
+	std 0.0664
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []
+
+
+KEY = im_left_deformed with 262 images:
+	mean [ 354.67938931  381.38931298]
+	min [168 152]
+	max [580 592]
+	std [ 77.68371647  73.94588206]
+
+now dimension ratios:
+	mean 0.9361
+	min 0.6000
+	max 1.3667
+	std 0.1416
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []
+
+
+KEY = im_right_deformed with 260 images:
+	mean [ 366.01538462  390.03076923]
+	min [222 236]
+	max [520 518]
+	std [ 47.75933008  47.4380468 ]
+
+now dimension ratios:
+	mean 0.9399
+	min 0.6736
+	max 1.1398
+	std 0.0692
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []

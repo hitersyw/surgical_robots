@@ -37,17 +37,24 @@ I'll explain each in turn.
 
 ## Pre-Processing
 
-Next, run `python process_data.py`. This will do the following main steps:
+Next, run `python scripts/process_data.py` from the home directory of the
+repository. This will do the following main steps:
 
 - Check all images for size and height/width sanity checks.
 
-- Resize images to be the same size, then shuffle into train/test
+  - Note: I have a method which lets me list unusual file sizes first. This lets
+    me manually delete images by looking up their index. I can do this with the
+    command `ls -lh > test.txt` and then inspect `test.txt` using vim with line
+    indices (be sure to add one since it starts from zero). Yeah, this is a bit
+    manual but it's probably best to catch these cases early.
 
-- Performs data augmentaiton after the train/valid/test split.
+- Resize images to be the same size, then shuffle into train/test.
 
 - Then saves them into numpy arrays for later use.
 
 ## Running CNNs
 
 Now this will use the training data from the last step to run a CNN classifier.
-Simply run `python run_network.py`. It contains built-in plotting code.
+Simply run `python scripts/run_network.py`, again from the home directory of the
+repository. It contains built-in code for data augmentation, and also code for
+plotting.
