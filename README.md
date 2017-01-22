@@ -1,6 +1,12 @@
 # Surgical Robots
 
-This involves three steps:
+**Update**: for preliminary results, see the `log_files` directory for the CNN's
+output.
+
+## Main Idea
+
+This repository will do some classification on surgical gauze for deformed vs
+normal testing. There are three major steps:
 
 - Getting the data somehow
 - Pre-processing it for a CNN
