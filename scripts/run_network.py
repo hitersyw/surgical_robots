@@ -32,7 +32,7 @@ def load_dataset():
 def run_cnn(data, 
             batch_size=32, 
             n_classes=2, 
-            n_epochs=100,
+            nb_epoch=100,
             data_augmentation=False):
     """ 
     Now this will finally run the CNN. It's based on the default design from the
@@ -40,18 +40,48 @@ def run_cnn(data,
     smaller network.
     """
 
-    # Load the data.
-    X_train, X_valid, X_test = data['X_train'], data['X_valid'], data['X_test']
-    Y_train = np_utils.to_categorical(data['y_train'], nb_classes)
-    Y_valid = np_utils.to_categorical(data['y_valid'], nb_classes)
-    Y_test = np_utils.to_categorical(data['y_test'], nb_classes)
+    #####################
+    ## DATA PROCESSING ##
+    #####################
 
-    # Form network architecture using standard Sequential model. I'm following
-    # the design used from the Keras default but it might be larger than needed.
+    # Have to add an exra dimension at the end due to dummy channels
+    X_train, X_valid, X_test = data['X_train'], data['X_valid'], data['X_test']
+    tr0, tr1, tr2 = X_train.shape
+    va0, va1, va2 = X_valid.shape
+    te0, te1, te2 = X_test.shape
+    X_train = X_train.reshape(tr0, tr1, tr2, 1)
+    X_valid = X_valid.reshape(va0, va1, va2, 1)
+    X_test = X_test.reshape(te0, te1, te2, 1)
+
+    Y_train = np_utils.to_categorical(data['y_train'], n_classes)
+    Y_valid = np_utils.to_categorical(data['y_valid'], n_classes)
+    Y_test = np_utils.to_categorical(data['y_test'], n_classes)
+
+    print("FYI:\nX_train: {}\nX_valid: {}\nX_test: {}\n".format(
+            X_train.shape,
+            X_valid.shape,
+            X_test.shape))
+    print("FYI:\nY_train: {}\nY_valid: {}\nY_test: {}\n".format(
+            Y_train.shape,
+            Y_valid.shape,
+            Y_test.shape))
+
+    # Also get the range in [-1,1] or some small numbers (note tha the data are
+    # _already_ zero-centered but magnitudes may still be high).
+    X_train /= 255
+    X_valid /= 255
+    X_test /= 255
+
+    #################
+    ## THE NETWORK ##
+    #################
+
+    # Following a design mostly from the Keras default.
     model = Sequential()
+    in_shape = X_train.shape[1:]
 
     # First set of convolutions.
-    model.add(Convolution2D(32, 3, 3, border_mode='same', input_shape=X_train.shape[1:]))
+    model.add(Convolution2D(32, 3, 3, border_mode='same', input_shape=in_shape))
     model.add(Activation('relu'))
     model.add(Convolution2D(32, 3, 3))
     model.add(Activation('relu'))
@@ -72,7 +102,7 @@ def run_cnn(data,
     model.add(Dense(512))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
-    model.add(Dense(nb_classes))
+    model.add(Dense(n_classes))
     model.add(Activation('softmax'))
 
     # Let's train the model using RMSprop
@@ -80,25 +110,31 @@ def run_cnn(data,
                   optimizer='rmsprop',
                   metrics=['accuracy'])
 
-    # Also get the range in [-1,1] or some small numbers (note tha the data are
-    # _already_ zero-centered but magnitudes may still be high).
-    X_train /= 255
-    X_valid /= 255
-    X_test /= 255
+    # Debugging.
+    model.summary()
 
     # Now we can try testing with and without data augmentation.
     if not data_augmentation:
+        # This should still be OK I think but let's see..
         print("Not using data augmentation")
         model.fit(X_train, Y_train,
                   batch_size=batch_size,
-                  n_epoch=n_epoch,
+                  nb_epoch=nb_epoch,
                   validation_data=(X_valid, Y_valid),
                   shuffle=True)
+        score = model.evaluate(X_test, Y_test, verbose=0)
+        print('Test score:', score[0])
+        print('Test accuracy:', score[1])
     else:
+        # Now data augmentation.
         print("Using real-time data augmentation.")
         print("TODO not implemented yet!")
 
 
 if __name__ == "__main__":
     data = load_dataset()
-    run_cnn(data)
+    run_cnn(data,
+            batch_size=32,
+            n_classes=2,
+            nb_epoch=50,
+            data_augmentation=False)
