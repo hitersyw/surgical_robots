@@ -50,6 +50,9 @@ repository. This will do the following main steps:
 
 - Resize images to be the same size, then shuffle into train/test.
 
+- Normalize them by centering the mean about 0. (This is the standard way to
+  deal with images; we actually don't often do variance normalization.)
+
 - Then saves them into numpy arrays for later use.
 
 ## Running CNNs

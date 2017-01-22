@@ -20,8 +20,8 @@ To make the required data, it basically does three major steps:
   potential human errors)
 - Resize all images to be 32x32 (we might be able to do larger, IDK, but this
   lets us use standard CIFAR-10 style networks to minimize experimentation).
-- Then split into train, valid, test. This must be done before data
-  augmentation, though we do the augmentation in the CNN code.
+- Then split into train, valid, test and zero-mean it. This must be done before
+  data augmentation, though we do the augmentation in the CNN code.
 """
 
 import cv2
@@ -29,8 +29,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import sys
-import scipy
-from scipy import misc
 
 
 def sanity_checks(data_dirs):
@@ -80,11 +78,86 @@ def sanity_checks(data_dirs):
         print("low ratio: {}".format(np.where(dim_ratio < 0.6)[0]))
 
 
-def load_and_save(data_dirs, height=32, width=32):
-    """ Now actually load the data into the numpy arrays. Also do preprocessing
-    here to zero-mean things, etc. We will _not_ do data augmentation here. 
+def load_and_save(data_dirs, ratios, height=32, width=32):
+    """ Now actually load the data into the numpy arrays. 
+    
+    Specifically:
+        - Load the images using cv2 in grayscale.
+        - Resize them to (height,width) using linear interpolation.
+        - Split based on train/valid/test, according to 'ratios' parameter.
+        - Find the mean of the TRAINING data's statistics. Then normalize the
+          three batches of data according to the TRAINING data's statistics.
+          This should be the standard way to normalize.
+        - Then save into numpy arrays.
     """
-    pass
+    assert (len(ratios) == 3) and (np.sum(ratios) == 1)
+    deform_yes = []
+    deform_no = [] 
+
+    # Get things loaded.
+    for directory in data_dirs:
+        for im in os.listdir(directory):
+            if ('DS_Store' in im or '.txt' in im): continue
+            image = cv2.imread(directory+'/'+im, cv2.IMREAD_GRAYSCALE)
+            image_resized = cv2.resize(image, 
+                                       (height,width), 
+                                       interpolation=cv2.INTER_LINEAR)
+            if ('deformed' in directory): 
+                deform_yes.append(image_resized)
+            else:
+                deform_no.append(image_resized)
+
+    # Balance the data and inspect sizes.
+    len_y, len_n = len(deform_yes), len(deform_no)
+    deform_yes = np.array(deform_yes)
+    deform_no = np.array(deform_no)
+    print("Resized data loaded.\n\tDeformed: {}\n\tNormal: {}".format(
+            deform_yes.shape, deform_no.shape))
+    indices_yes = np.random.choice(len_y, min(len_y, len_n), replace=False)
+    indices_no = np.random.choice(len_n, min(len_y, len_n), replace=False)
+    deform_yes = deform_yes[indices_yes]
+    deform_no = deform_no[indices_no]
+    print("With balanced data now.\n\tDeformed: {}\n\tNormal: {}".format(
+            deform_yes.shape, deform_no.shape))
+
+    # Combine into one dataset and create labels: 0=NORMAL, 1=DEFORMED. 
+    all_data = np.concatenate((deform_yes, deform_no))
+    all_labels = np.concatenate((np.ones(deform_yes.shape[0]),
+                                 np.zeros(deform_no.shape[0])))
+    print("All the data together now.\n\tData: {}\n\tLabels: {}".format(
+            all_data.shape, all_labels.shape))
+
+    # Then shuffle & split. Use the same indices to keep data & labels matched.
+    N = all_data.shape[0]
+    indices = np.random.permutation(N)
+
+    indices_train = indices[ : int(N*ratios[0])]
+    indices_valid = indices[int(N*ratios[0]) : int(N*(ratios[0]+ratios[1]))]
+    indices_test  = indices[int(N*(ratios[0]+ratios[1])) : ]
+
+    X_train = all_data[indices_train].astype('float32')
+    y_train = all_labels[indices_train]
+    X_valid = all_data[indices_valid].astype('float32')
+    y_valid = all_labels[indices_valid]
+    X_test = all_data[indices_test].astype('float32')
+    y_test = all_labels[indices_test]
+
+    print("X_train {}, y_train {}".format(X_train.shape, y_train.shape))
+    print("X_valid {}, y_valid {}".format(X_valid.shape, y_valid.shape))
+    print("X_test {}, y_test {}".format(X_test.shape, y_test.shape))
+
+    # Now center the images, and then save. Whew.
+    mean_image = np.mean(X_train, axis=0).astype('float32')
+    X_train -= mean_image
+    X_valid -= mean_image
+    X_test -= mean_image
+
+    np.save("final_data/X_train", X_train)
+    np.save("final_data/y_train", y_train)
+    np.save("final_data/X_valid", X_valid)
+    np.save("final_data/y_valid", y_valid)
+    np.save("final_data/X_test", X_test)
+    np.save("final_data/y_test", y_test)
 
 
 if __name__ == "__main__":
@@ -92,7 +165,8 @@ if __name__ == "__main__":
                  'data_raw/im_right_deformed',
                  'data_raw/im_left_normal',
                  'data_raw/im_right_normal']
+    # once the data is clean, I don't need to run this method any more.
     #sanity_checks(data_dirs)
-    height = 32
-    width = 32
-    load_and_save(data_dirs, height=height, width=width)
+    height, width = 32, 32
+    ratios = [0.75, 0.05, 0.20]
+    load_and_save(data_dirs, height=height, width=width, ratios=ratios)
