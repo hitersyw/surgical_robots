@@ -1,44 +1,53 @@
-# surgical_robots
+# Surgical Robots
 
-Here are the steps I did, just to be clear:
+This involves three steps:
 
-- Directories `camera_left` and `camera_right` contain the raw images from the
-  da vinci's two cameras. There are 67 for each arm, hence 134 total.
+- Getting the data somehow
+- Pre-processing it for a CNN
+- Running a CNN
+
+I'll explain each in turn.
+
+## Getting the Data
+
+- I took two pieces of surgical gauze and saved lots of images manually. I
+  altered the images gradually, so as to get more variation in the images.
+  Alterations include more deformations, rotations, pushing/pulling the gauze to
+  make it flatter or slightly bumpy, slight stretches, and changing the light
+  orientation.
+
+- I put all these in the directories `camera_left` and `camera_right`. These
+  contain the raw images from the da vinci's two cameras. There are 67 for each
+  arm, hence 134 total. (The distinction between left/right shouldn't matter but
+  I'll keep track of them anyway in case the lighting difference causes too much
+  confusion, but I think it will be beneficial to have it.)
 
 - Then on my local computer, I just took a bunch of screenshots (CMD-SHIFT-4) to
   get a huge list of images. I took screenshots of all the **deformed** stuff,
   basically bounding boxes. I then put those in `im_left_deformed` or
-  `im_right_deformed`, depending on whether they came from the left or right. I
-  repeated the process for the **non-deformed** stuff, where I took care to try
-  and pick a diversity of non-deformed stuff, but to also ensure minimal to no
-  overlap with a deformed image. (The distinction between left/right shouldn't
-  matter but I'll keep track of them anyway in case the lighting difference
-  causes too much confusion, but I think it will be beneficial to have it.)
-  Those "normal" images are stored in `im_left_normal` and `im_right_normal`.
+  `im_right_deformed`. I repeated this for the **non-deformed** stuff, where I
+  took care to try and pick a diversity of non-deformed stuff, but to also
+  ensure minimal to no overlap with a deformed image. These "normal" images are
+  stored in `im_left_normal` and `im_right_normal`.
 
-  Note I: I tried to be consistent and also to avoid noise, i.e. the border of
-  the gauze.
+  - Note I: I tried to be consistent in the way I was taking screenshots, by
+    taking similar sizes, avoiding the border of the gauze, not making them too
+    large or wide since we have to resize them later, etc.
+  - Note II: Use space bars in Mac preview. It makes sorting faster. =)
 
-  Note II: Be sure to bound stuff from top to bottom so I don't forget any.
+## Pre-Processing
 
-  Note III: If there are images I made which are particularly small, I should
-  eliminate them.  On the other hand, even the smallest ones are larger than
-  28x28, I think. How small do we want them? 32x32?
-  
-  Note IV: Or really wide. I tried not to make really small or really wide ones
-  ... but it's tricky, how do we usually do this with variable patch sizes? That
-  sounds like a job for attention models but I'm not sure if we need anything
-  sophisticated like that. Yeah, I think if there's something really wide, I
-  should just split it in two and make two separate images. Hey, it makes our
-  dataset larger! EDIT: Programmatically check the images for sizes. That's
-  easier and faster.
+Next, run `python process_data.py`. This will do the following main steps:
 
-  Note V: I will rename these frames automatically using Python later.
+- Check all images for size and height/width sanity checks.
 
-- TODO preprocessing to clear out junk stuff? Pressing space in preview means
-  arrow keys can be used to scroll quickly to check for junk cases.
+- Resize images to be the same size, then shuffle into train/test
 
-- Then it's data augmentation. TODO
+- Performs data augmentaiton after the train/valid/test split.
 
-- Then train a CNN using keras and Tensorflow. TODO
+- Then saves them into numpy arrays for later use.
 
+## Running CNNs
+
+Now this will use the training data from the last step to run a CNN classifier.
+Simply run `python run_network.py`. It contains built-in plotting code.
