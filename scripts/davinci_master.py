@@ -20,8 +20,13 @@ from geometry_msgs.msg import PoseStamped
 import sys
 import os
 
-# Some stuff needed for Keras, etc.
+# Some stuff needed for my additions. I don't think we'll need theano GPU but
+# here's how to use it if I need it.
+# import theano
+# import theano.config.device = 'gpu'
+# import theano.config.floatX = 'float32'
 from keras.models import load_model
+import utilities
 
 
 class DavinciMaster:
@@ -82,22 +87,31 @@ class DavinciMaster:
             return
         self.left_image = self.bridge.imgmsg_to_cv2(msg, "rgb8")
         self.lcounter += 1
-        result = predict(self.left_image) # have each camera call this?
 
-        # TODO do some stuff with result here ...
-        # TODO then manage logic about how fast and long we want to run 
+        # TODO this is going to be in flux depending on what we do. Later, I'll
+        # put these as class properties or offload to shared methods.
+
+        left_image_gray = utilities.rgb2gray(self.left_image)
+        raw_size = (400,400)
+        scaled_size = (32,32)
+        stride = 200
+        patches, centroids = utilities.get_patches(left_image_gray, 
+                                                   raw_size=raw_size,
+                                                   scaled_size=scaled_size,
+                                                   stride=stride)
+        sh0, sh1, sh2 = patches.shape
+        patches = patches.reshape(sh0, sh1, sh2, 1) 
+        patches /= 255
+        pred_probs = self.model.predict(patches)
+        predictions = np.argmax(pred_probs, axis=1)
+
+        # TODO then we have to use these patches somehow in a reinforcement
+        # leanring environment, THEN manage logic about how fast and long we
+        # want to run. Whew.
 
         rospy.sleep(2)
         if (self.lcounter == 2):
             rospy.signal_shutdown("all done")
-
-
-    def predict(self, img):
-        """ prediction code (draft), returns 0=NORMAL or 1=DEFORMED. """
-        sh0, sh1, sh2 = img.shape
-        img = img.reshape(sh0, sh1, sh2, 1)
-        img /= 255
-        return np.argmax(self.model.predict(img), axis=1)
 
 
 if __name__ == "__main__":

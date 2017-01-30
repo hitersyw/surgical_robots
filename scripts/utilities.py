@@ -5,6 +5,7 @@ Import it inside the detect_images.py code.
 
 #import rospy
 #from sensor_msgs.msg import Image
+import cv2
 import numpy as np
 from sklearn.feature_extraction import image
 from keras.models import load_model
@@ -39,31 +40,35 @@ def rgb2gray(rgb):
     return np.dot(rgb[...,:3], [0.299, 0.587, 0.114])
 
 
-def generate_patches(im, size, stride):
+def generate_patches(im, raw_size, scaled_size, stride):
     """ Generates patches and centroids from an input image.
     
     Args:
         im: A **grayscale** image from the robot's camera, which I assume has
             shape (1080,1920).
-        size: A 2-D tuple representing the sizes of each patch.
+        raw_size: A 2-D tuple representing the raw (pixel) sizes of each patch.
+        scaled_size: A 2-D tuple representing the **resized** version of these
+            patches, using the same linear interpolation from training.
         stride: The amount we skip when extracting new patches.
         
     Returns:
         A tuple consisting of: (1) a 3-D array of patches of size (N,d1,d2)
-        where (d1,d2)=size, and (2) an array of centroids of size (N,2) where
-        the second axis represents the centroid, with coordinates rounded to the
-        nearest integer.
+        where (d1,d2)=scaled_size, and (2) an array of centroids of size (N,2)
+        where the second axis represents the centroid, with coordinates rounded
+        to the nearest integer.
     """
     patches = []
     centroids = []
     x,y = 0,0
-    dx,dy = size
+    dx,dy = raw_size
     maxX,maxY = im.shape
   
     for x in range(0, maxX-dx, stride):
         for y in range(0, maxY-dy, stride):
-            patches.append(np.array(im[x:x+dx, y:y+dy]))
-            print(im[x:x+dx, y:y+dy].shape)
+            patch = cv2.resize(im[x:x+dx, y:y+dy],
+                               scaled_size,
+                               interpolation=cv2.INTER_LINEAR)
+            patches.append(patch)
             cx = x + dx/2
             cy = y + dy/2
             centroids.append(np.array([cx,cy]))
@@ -78,7 +83,10 @@ if __name__ == "__main__":
     # Some test cases here with patches.
     im = rgb2gray(np.load("np_image/left0.npy"))
     print("Loaded image with shape {}.".format(im.shape))
-    patches, centroids = generate_patches(im, size=(400,400), stride=200)
+    patches, centroids = generate_patches(im, 
+                                          raw_size=(100,100), 
+                                          scaled_size=(32,32), 
+                                          stride=100)
     print(patches.shape)
     print(centroids.shape)
     print(centroids)
