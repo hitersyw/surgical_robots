@@ -20,7 +20,8 @@ from geometry_msgs.msg import PoseStamped
 import sys
 import os
 
-# Some stuff needed for Keras
+# Some stuff needed for Keras, etc.
+from keras.models import load_model
 
 
 class DavinciMaster:
@@ -32,16 +33,23 @@ class DavinciMaster:
         self.lcounter = 0
         self.info = {'l': None, 'r': None}
         self.bridge = cv_bridge.CvBridge()
+
+        # Network loading (TODO file obviously has to change to be the correct one ...)
+        self.model = load_model("networks/cnn_cifar_keras_style.h5")
+
         #========SUBSCRIBERS========#
         # image subscribers
         rospy.init_node('image_saver')
         sb = rospy.Subscriber("/endoscope/left/image_rect_color", Image, self.left_image_callback, queue_size=1)
+        rospy.spin()
+        # Ignore these other three subscribers for now
         #rospy.Subscriber("/endoscope/right/image_rect_color", Image, self.right_image_callback, queue_size=1)
         # info subscribers
         #rospy.Subscriber("/endoscope/left/camera_info", CameraInfo, self.left_info_callback)
         #rospy.Subscriber("/endoscope/right/camera_info", CameraInfo, self.right_info_callback)
-        rospy.spin()
 
+
+    """
     def left_info_callback(self, msg):
         if self.info['l']:
             return
@@ -49,6 +57,7 @@ class DavinciMaster:
         f = open("calibration_data/camera_left.p", "w")
         pickle.dump(msg, f)
         f.close()
+
 
     def right_info_callback(self, msg):
         if self.info['r']:
@@ -58,24 +67,37 @@ class DavinciMaster:
         pickle.dump(msg, f)
         f.close()
 
+
     def right_image_callback(self, msg):
         if rospy.is_shutdown():
             return
         self.right_image = self.bridge.imgmsg_to_cv2(msg, "rgb8")
         scipy.misc.imsave('images/right' + str(self.rcounter) + '.jpg', self.right_image)
         self.rcounter += 1
+    """
+
 
     def left_image_callback(self, msg):
         if rospy.is_shutdown():
             return
         self.left_image = self.bridge.imgmsg_to_cv2(msg, "rgb8")
-        scipy.misc.imsave('images/left' + str(self.lcounter) + '.jpg', self.left_image)
-        np.save("np_image/left" +str(self.lcounter), self.left_image)
         self.lcounter += 1
-        # FINALLY figured out sleep and signal_shutdown.
+        result = predict(self.left_image) # have each camera call this?
+
+        # TODO do some stuff with result here ...
+        # TODO then manage logic about how fast and long we want to run 
+
         rospy.sleep(2)
         if (self.lcounter == 2):
             rospy.signal_shutdown("all done")
+
+
+    def predict(self, img):
+        """ prediction code (draft), returns 0=NORMAL or 1=DEFORMED. """
+        sh0, sh1, sh2 = img.shape
+        img = img.reshape(sh0, sh1, sh2, 1)
+        img /= 255
+        return np.argmax(self.model.predict(img), axis=1)
 
 
 if __name__ == "__main__":

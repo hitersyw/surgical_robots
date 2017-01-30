@@ -18,17 +18,20 @@ def keras_test():
     """
     X_test = np.load('final_data/X_test.npy')
     y_test = np.load('final_data/y_test.npy')
+
     te0, te1, te2 = X_test.shape
     X_test = X_test.reshape(te0, te1, te2, 1)
     X_test /= 255 # don't forget!
     n_classes = 2
     Y_test = np_utils.to_categorical(y_test, n_classes)
 
-    # Now we can predict!
     model = load_model("networks/cnn_cifar_keras_style.h5")
-    score = model.evaluate(X_test, Y_test, verbose=1)
-    print("Test score: {}".format(score[0]))
-    print("Test accuracy: {}".format(score[1]))
+    #score = model.evaluate(X_test, Y_test, verbose=1)
+    #print("Test score: {}".format(score[0]))
+    #print("Test accuracy: {}".format(score[1]))
+    predictions = model.predict(X_test, verbose=1)
+    print(predictions.shape)
+    print(np.argmax(predictions, axis=1))
 
 
 def generate_patches(im, size, stride):
@@ -49,9 +52,11 @@ def generate_patches(im, size, stride):
 
 
 if __name__ == "__main__":
-    # Some test cases here.
+    # keras test, it works
+    #keras_test()
+
+    # Some test cases here with patches.
     im = np.load("np_image/left0.npy")
     print("Loaded image with shape {}.".format(im.shape))
     patches = generate_patches(im, size=(400,400), stride=200)
     print(patches.shape)
-    keras_test()
