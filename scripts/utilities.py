@@ -34,21 +34,41 @@ def keras_test():
     print(np.argmax(predictions, axis=1))
 
 
+def rgb2gray(rgb):
+    """ The usual, from StackOverflow. """
+    return np.dot(rgb[...,:3], [0.299, 0.587, 0.114])
+
+
 def generate_patches(im, size, stride):
-    """ Generates patches. For now I'm just using the scikit-learn method 
-    but we really should have our own implementation. It's not hard, just 
-    a bunch of annoying indexing. Size should be 2-D since the third channel
-    should not be split up.
+    """ Generates patches and centroids from an input image.
+    
+    Args:
+        im: A **grayscale** image from the robot's camera, which I assume has
+            shape (1080,1920).
+        size: A 2-D tuple representing the sizes of each patch.
+        stride: The amount we skip when extracting new patches.
+        
+    Returns:
+        A tuple consisting of: (1) a 3-D array of patches of size (N,d1,d2)
+        where (d1,d2)=size, and (2) an array of centroids of size (N,2) where
+        the second axis represents the centroid, with coordinates rounded to the
+        nearest integer.
     """
     patches = []
-    x,y,z = 0,0,0
+    centroids = []
+    x,y = 0,0
     dx,dy = size
-    maxX,maxY,_ = im.shape
+    maxX,maxY = im.shape
   
     for x in range(0, maxX-dx, stride):
         for y in range(0, maxY-dy, stride):
-          patches.append(im[x:x+dx, y:y+dy, :]) 
-    return np.array(patches)
+            patches.append(np.array(im[x:x+dx, y:y+dy]))
+            print(im[x:x+dx, y:y+dy].shape)
+            cx = x + dx/2
+            cy = y + dy/2
+            centroids.append(np.array([cx,cy]))
+
+    return np.array(patches), np.array(centroids)
 
 
 if __name__ == "__main__":
@@ -56,7 +76,9 @@ if __name__ == "__main__":
     #keras_test()
 
     # Some test cases here with patches.
-    im = np.load("np_image/left0.npy")
+    im = rgb2gray(np.load("np_image/left0.npy"))
     print("Loaded image with shape {}.".format(im.shape))
-    patches = generate_patches(im, size=(400,400), stride=200)
+    patches, centroids = generate_patches(im, size=(400,400), stride=200)
     print(patches.shape)
+    print(centroids.shape)
+    print(centroids)
