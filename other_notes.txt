@@ -1,0 +1,74 @@
+Readme to help me understand stuff on this machine.
+-Daniel Seita
+
+This computer is for capturing images of the da vinci robot's camera. We can do a lot of stuff with that.
+
+The "endoscope" code seems to be in:
+
+/home/davinci2/gscam/catkin_ws/src/gscam/examples/
+
+The 'ros' startup script looks to be in /.ros and we can run that? That's where the frames were saved by default. When Sanjay started it, he was in the `~/.ros/log` dirctory and ran the following command:
+
+roslaunch gscam endoscope.launch
+
+Simply do CTRL-C to exit the program.
+
+Here's the workflow for me:
+
+(0) Actually, before we do anything I think the other computer (the "controls") has to be started to get the robot working at all. That's the other computer but fortunately it'll probably be on for all of my work time. I'd rather not get involved in that.
+
+(1) Get the device with the clips (the Stewart Platform?) set up at the center of the robot's camera (the endoscope).
+
+(2) Now pick a gauze and clip it inside. The gauze may or may not have different deformations in it, which I'll do manually. However, I'll want to start with a clean Gauze and maybe if the line to be cut is not rotationally symmetric, I'll rotate around to get more data. But regardless, have some gauze, deformed or not, inside there.
+
+(3) Launch the script `roslaunch gscam endoscope.launch`. I'll see images. RIGHT CLICK to save. I should probably do this for ONE of the left or right hand sides. The problem is that the left/right will override each other, each time I click on the left camera, it'll save starting from 0, but so will the right ... seems really bad design but maybe the images are the same.
+
+(4) Change the gauze somehow (either deform it or start with a new one) and then take more pictures. Ways to change: 
+
+- translate the gauze to get lighting changes
+- push the gauze up/down so we see slight hills and valleys
+- change the stretching, stretch different parts
+- add more deforming (second-to-last resort)
+- change gauze (last resort)
+
+Repeat this until I'm satisfied.
+
+By the way, we're only doing this with circle gauzes. It takes a lot of man-hours to manually generate datsets like these.
+
+(5) Now copy those over to my directory and then I can work with these. I'll have to ssh probably, and DON'T INSTALL ANYTHING NEW WITHOUT USING VIRTUALENV. You know, since I won't be able to do a lot manually, it's probably better if I copy and paste it locally or to my GPU work station.
+
+By "work with these" I mean I'm taking these JPG images and applying various numpy array operations to deform them. Look at this online, there's tons of stuff. I'll also be using these on *patches* not necessarily the real images. Or think of bounding boxes? Lots of work has been done on that. Time to brainstorm this weekend.
+
+
+
+Wednesday, January 25, 2017
+
+NEXT STEP: Try to translate between robot frame and centroids. To be specific, the robot must look at an image in real time and extract various patches. Then we need to somehow obtain the center of those frames, for the robot to aim at in **its own coordinates**. Hmmm ... maybe its better to try and get this done independent of the robot? Never mind let's use the robot while we have it. So goal: let's `subscribe` to an image, so write a script that when we run once will do this process.
+
+For real time, just call this multiple times every x seconds?
+
+OK, I see an image_saver.py script that will save **very often** by default, every `tick`. However, I can slow this down with `rospy.sleep(...)` and exit with `rospy.signal_shutdown()` once some condition is met. The `rospy.spin()` command continually "runs" the subscribers.
+
+Regarding patches, I can easily get patches ... and their centers (just add x,y by dx/2 and dy/2) and those themselves will be easy to input into the trained network. But still major questions:
+
+1. Given pixel location out of (1080,1920)-dim RGB image, how do I get the robot's frame coordinates? I assume once I have that, we can order the robot to move a gripper there.
+
+  My *guess* for this one is to use the camera calibration by making a new subscriber. Fortunately, this only saves once. Then there's a `CameraInfo` page on the Wiki which explains the coordinate system from the camera.
+
+2. How do I utilize the subscribers? Idea: subscribers will continually extract numpy arrays so maybe repeatedly call the network **within** the subscriber's method? I have to be careful that this image conversion will create consistent input to the network as the training data. But I think the default rgb8 should do a good job?
+
+3. How do I actually put all this together into a policy? (Later)
+
+Sanjay plans to get the code for turning camera point into robot frame by the end of this week. In the meantime, I'm supposed to be doing a lot of other stuff. I'll put the virtual environment into the `dan_seita` directory for now. Yeah, sorry that's lame but it'll do for a project directory.
+
+
+
+Monday, January 30, 2017 (better pick up the pace!!)
+
+I think we can follow this design:
+
+1. davinci_master.py is the code with the DavinciMaster class which we create to run things. 
+It has subscribers which will repeatedly query images and then run the network code on them.
+
+2. utilities.py will be a script with utilities we can import for handling logic on images, plotting, etc.
+That's probably all we need.

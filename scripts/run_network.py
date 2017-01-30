@@ -130,6 +130,8 @@ def run_cnn(data,
         print("Using real-time data augmentation.")
         print("TODO not implemented yet!")
 
+    model.save("networks/model_00.h5")
+
 
 if __name__ == "__main__":
     data = load_dataset()

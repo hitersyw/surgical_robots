@@ -66,4 +66,4 @@ repository. This will do the following main steps:
 Now this will use the training data from the last step to run a CNN classifier.
 Simply run `python scripts/run_network.py`, again from the home directory of the
 repository. It contains built-in code for data augmentation, and also code for
-plotting.
+plotting. The `networks` file contains stored weights.
