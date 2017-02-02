@@ -3,8 +3,6 @@ Have this be a separate script of utility methods.
 Import it inside the detect_images.py code.
 """
 
-#import rospy
-#from sensor_msgs.msg import Image
 import cv2
 import numpy as np
 from sklearn.feature_extraction import image
@@ -42,7 +40,10 @@ def rgb2gray(rgb):
 
 def get_patches(im, raw_size, scaled_size, stride, save=False):
     """ Generates patches and centroids from an input image. It also includes 
-    functionality to save the original-sized patches for manual inspection.
+    functionality to save the original-sized patches for manual inspection. Note
+    also that we do NOT scale (divide by 255) here, nor do we zero-center. That
+    comes outside of this code, and means I we directly look at patches_original
+    to inspect images.
     
     Args:
         im: A **grayscale** image from the robot's camera, which I assume has
@@ -82,15 +83,30 @@ def get_patches(im, raw_size, scaled_size, stride, save=False):
     return np.array(patches), np.array(centroids)
 
 
+def test_davinci_patches():
+    """ For testing patches seen by davinci and inspect performance. Don't call
+    this while running davinci itself; do it after the experiment. Make sure the
+    inspection is done on the non-centered, non-scaled, and non-resized data.
+    """
+    outfile = "misc/"
+    patches = np.load("misc/patches_davinci.npy")
+    print("Loaded patches of shape {}".format(patches.shape))
+    for i in range(patches.shape[0]):
+        cv2.imwrite(outfile+ "patch_" +str.zfill(str(i),3)+ ".jpg", patches[i])
+
+
 if __name__ == "__main__":
-    # keras test, it should work
+    # Keras test, it should work
     #keras_test()
 
-    ## Some test cases here with patches.
+    # Some test cases here with patches.
     #im = rgb2gray(np.load("np_image/left0.npy"))
     #print("Loaded image with shape {}.".format(im.shape))
     #patches, centroids = get_patches(im, 
     #                                 raw_size=(100,100), 
     #                                 scaled_size=(32,32), 
     #                                 stride=100)
+
+    # Test the patches found from davinci (requires file outside of github).
+    test_davinci_patches()
     pass

@@ -184,11 +184,13 @@ def load_and_save(train_data, test_data, ratios, height=32, width=32):
     print("X_valid {}, y_valid {}".format(X_valid.shape, y_valid.shape))
     print("X_test {}, y_test {}".format(X_test.shape, y_test.shape))
 
-    # Now center the images, and then save. Whew.
+    # Now center the images, and then save. Whew. SAVE THE MEAN!!
     mean_image = np.mean(X_train, axis=0).astype('float32')
     X_train -= mean_image
     X_valid -= mean_image
     X_test -= mean_image
+    print("Saving the mean (shape = {}) ...".format(mean_image.shape))
+    np.save("final_data/X_train_MEAN", mean_image)
 
     np.save("final_data/X_train", X_train)
     np.save("final_data/y_train", y_train)
@@ -196,6 +198,11 @@ def load_and_save(train_data, test_data, ratios, height=32, width=32):
     np.save("final_data/y_valid", y_valid)
     np.save("final_data/X_test", X_test)
     np.save("final_data/y_test", y_test)
+
+    # Some last-minute sanity checks.
+    print("max(X_train) = {}".format(np.max(X_train)))
+    print("max(X_valid) = {}".format(np.max(X_valid)))
+    print("max(X_test) = {}".format(np.max(X_test)))
 
 
 if __name__ == "__main__":

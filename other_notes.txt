@@ -160,3 +160,7 @@ uncomfortable majority of predictions put lots of weight to the deformed case.
 This might be an issue with certain patches not being representative of the
 data, i.e. patches that have the gripper or those which are not entirely
 contained inside the gauze.
+
+WAIT ... I forgot to zero-center the images. That might do it!! Also it looks
+like the camera image doesn't capture the full gauze ... that's interesting (and
+better for our purposes since we don't have to crop ourselves).
