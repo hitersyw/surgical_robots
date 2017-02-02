@@ -123,3 +123,40 @@ on images, plotting, etc.  That's probably all we need.
 
 So what I need to do before the lab meeting is to figure out more about the
 "other stuff I have to do".
+
+
+
+Thursday, February 2, 2017 (PICK UP THE PACE)
+
+I managed to get a third gauze to create the entirely held-out test set (this is
+the correct way to do data augmentation). I am getting >99% accuracy. =)
+Actually, I get 123/124 using Tensorflow and 122/124 using Theano. The
+predictions are almost always correct with 0.99 or higher for one class and 0.01
+or less for the other class, but there are two exceptions. With Tensorflow, the
+erroneous one gets:
+
+[ 0.9967379   0.00326213]
+
+i.e. the *reverse*. And there is another ambiguous case which is close, though
+Tensorflow still gets it correct:
+
+[ 0.34936979  0.65063024]
+
+Now let's test davinci_master.py and the corresponding utilities.py helper file.
+
+PS: 0 (the first index) means normal, 1 (the second index) means deformed.
+
+OK!!! I got da vinci to work with the CNN. That is, if I run
+
+    roslaunch gscam endoscope.launch
+
+and then run
+
+    python scripts/davinci_master.py
+
+I can load in the CNN which I trained earlier, create patches based on
+size and stride parameters, and then predict them. Nice! However, an
+uncomfortable majority of predictions put lots of weight to the deformed case.
+This might be an issue with certain patches not being representative of the
+data, i.e. patches that have the gripper or those which are not entirely
+contained inside the gauze.
