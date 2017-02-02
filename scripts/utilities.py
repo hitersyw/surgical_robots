@@ -50,7 +50,8 @@ def get_patches(im, raw_size, scaled_size, stride, save=False):
             shape (1080,1920).
         raw_size: A 2-D tuple representing the raw (pixel) sizes of each patch.
         scaled_size: A 2-D tuple representing the **resized** version of these
-            patches, using the same linear interpolation from training.
+            patches, using the same linear interpolation from training. AND we 
+            zero-center them here (which happens before dividing by 255).
         stride: The amount we skip when extracting new patches.
         
     Returns:
@@ -65,6 +66,7 @@ def get_patches(im, raw_size, scaled_size, stride, save=False):
     x,y = 0,0
     dx,dy = raw_size
     maxX,maxY = im.shape
+    X_mean = np.load("final_data/X_train_MEAN.npy")
   
     for x in range(0, maxX-dx, stride):
         for y in range(0, maxY-dy, stride):
@@ -73,26 +75,29 @@ def get_patches(im, raw_size, scaled_size, stride, save=False):
             patch = cv2.resize(im[x:x+dx, y:y+dy],
                                scaled_size,
                                interpolation=cv2.INTER_LINEAR)
+            patch -= X_mean
             patches.append(patch)
             cx = x + dx/2
             cy = y + dy/2
             centroids.append(np.array([cx,cy]))
 
     if save:
-        np.save("original_patches", np.array(patches_original))
+        np.save("misc/full_image", im)
+        np.save("misc/raw_patches", np.array(patches_original))
     return np.array(patches), np.array(centroids)
 
 
 def test_davinci_patches():
     """ For testing patches seen by davinci and inspect performance. Don't call
     this while running davinci itself; do it after the experiment. Make sure the
-    inspection is done on the non-centered, non-scaled, and non-resized data.
+    inspection is done on the non-centered, non-scaled, and non-resized data. 
     """
     outfile = "misc/"
     patches = np.load("misc/patches_davinci.npy")
     print("Loaded patches of shape {}".format(patches.shape))
     for i in range(patches.shape[0]):
         cv2.imwrite(outfile+ "patch_" +str.zfill(str(i),3)+ ".jpg", patches[i])
+    cv2.imwrite(outfile+ "fullimg.jpg", np.load("misc/full_image.npy"))
 
 
 if __name__ == "__main__":

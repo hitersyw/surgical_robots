@@ -104,7 +104,7 @@ class DavinciMaster:
                                                    save=True)
         sh0, sh1, sh2 = patches.shape
         patches = patches.reshape(sh0, sh1, sh2, 1) 
-        patches /= 255
+        patches /= 255 # OK to do this since it's **after** zero-centering
         pred_probs = self.model.predict(patches)
         predictions = np.argmax(pred_probs, axis=1)
 
