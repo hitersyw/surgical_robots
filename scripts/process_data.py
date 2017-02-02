@@ -200,9 +200,9 @@ def load_and_save(train_data, test_data, ratios, height=32, width=32):
     np.save("final_data/y_test", y_test)
 
     # Some last-minute sanity checks.
-    print("max(X_train) = {}".format(np.max(X_train)))
-    print("max(X_valid) = {}".format(np.max(X_valid)))
-    print("max(X_test) = {}".format(np.max(X_test)))
+    print("min, max X_train = {}, {}".format(np.min(X_train), np.max(X_train)))
+    print("min, max X_valid = {}, {}".format(np.min(X_valid), np.max(X_valid)))
+    print("min, max X_test = {}, {}".format(np.min(X_test), np.max(X_test)))
 
 
 if __name__ == "__main__":
