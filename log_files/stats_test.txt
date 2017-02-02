@@ -1,0 +1,76 @@
+
+
+KEY = data_raw_test/im_left_normal with 37 images:
+	mean [ 377.18918919  395.51351351]
+	min [316 318]
+	max [436 454]
+	std [ 25.02953697  30.10398341]
+
+now dimension ratios:
+	mean 0.9561
+	min 0.8169
+	max 1.0698
+	std 0.0559
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []
+
+
+KEY = data_raw_test/im_left_deformed with 33 images:
+	mean [ 333.03030303  354.54545455]
+	min [258 264]
+	max [398 430]
+	std [ 30.29999985  29.95460293]
+
+now dimension ratios:
+	mean 0.9405
+	min 0.7802
+	max 1.0370
+	std 0.0562
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []
+
+
+KEY = data_raw_test/im_right_deformed with 30 images:
+	mean [ 326.73333333  349.93333333]
+	min [234 288]
+	max [372 392]
+	std [ 26.59565545  23.16597121]
+
+now dimension ratios:
+	mean 0.9345
+	min 0.8103
+	max 1.0629
+	std 0.0614
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []
+
+
+KEY = data_raw_test/im_right_normal with 25 images:
+	mean [ 341.6   367.12]
+	min [288 300]
+	max [398 414]
+	std [ 24.23881185  30.00309317]
+
+now dimension ratios:
+	mean 0.9337
+	min 0.8039
+	max 1.0500
+	std 0.0658
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []

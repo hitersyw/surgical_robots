@@ -1,0 +1,20 @@
+Resized data loaded.
+	Train (+Valid) Deformed: (522, 32, 32)
+	Train Normal: (628, 32, 32)
+	Test Deformed: (63, 32, 32)
+	Test Normal: (62, 32, 32)
+With balanced data now.
+	Train (+Valid) Deformed: (522, 32, 32)
+	Train Normal: (522, 32, 32)
+	Test (+Valid) Deformed: (62, 32, 32)
+	Test Normal: (62, 32, 32)
+Train data together now.
+	Data: (1044, 32, 32)
+	Labels: (1044,)
+Test data together now.
+	Data: (124, 32, 32)
+	Labels: (124,)
+X_train (939, 32, 32), y_train (939,)
+X_valid (105, 32, 32), y_valid (105,)
+X_test (124, 32, 32), y_test (124,)
+All done!

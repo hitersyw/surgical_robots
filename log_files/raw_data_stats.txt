@@ -1,3 +1,5 @@
+UPDATE: This is now deprecated.
+
 Daniel's note: this is the process_data script run with the inspection step. I
 used this to explicitly delete several of the images with skewed shapes, most
 notably those from the im_left_deformed since those were what I did first and I

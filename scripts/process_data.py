@@ -33,9 +33,7 @@ import sys
 
 def sanity_checks(data_dirs):
     """ Run this to double-check data w/out changing anything. Then manually
-    inspect those troublesome cases and delete if needed. This is mainly for a
-    sanity check.
-    """
+    inspect those troublesome cases and delete if needed. """
     shapes = {}
 
     # Get shapes loaded.
@@ -78,24 +76,30 @@ def sanity_checks(data_dirs):
         print("low ratio: {}".format(np.where(dim_ratio < 0.6)[0]))
 
 
-def load_and_save(data_dirs, ratios, height=32, width=32):
-    """ Now actually load the data into the numpy arrays. 
+def load_and_save(train_data, test_data, ratios, height=32, width=32):
+    """ Now actually load the data into the numpy arrays. It's a bit sloppy
+    since I modified this on short notice to handle an entirely new held-out
+    testing set.
     
     Specifically:
         - Load the images using cv2 in grayscale.
         - Resize them to (height,width) using linear interpolation.
-        - Split based on train/valid/test, according to 'ratios' parameter.
+        - Split based on train/valid/test, according to 'ratios' parameter,
+          though the test data is now distinct so the ratios here only refers to
+          the train and validation split.
         - Find the mean of the TRAINING data's statistics. Then normalize the
           three batches of data according to the TRAINING data's statistics.
           This should be the standard way to normalize.
         - Then save into numpy arrays.
     """
-    assert (len(ratios) == 3) and (np.sum(ratios) == 1)
-    deform_yes = []
-    deform_no = [] 
+    assert (len(ratios) == 2) and (np.sum(ratios) == 1)
+    deform_yes_train = []
+    deform_no_train = [] 
+    deform_yes_test = []
+    deform_no_test = [] 
 
-    # Get things loaded.
-    for directory in data_dirs:
+    # Get things loaded, first training (and validation):
+    for directory in train_data:
         for im in os.listdir(directory):
             if ('DS_Store' in im or '.txt' in im): continue
             image = cv2.imread(directory+'/'+im, cv2.IMREAD_GRAYSCALE)
@@ -103,44 +107,78 @@ def load_and_save(data_dirs, ratios, height=32, width=32):
                                        (height,width), 
                                        interpolation=cv2.INTER_LINEAR)
             if ('deformed' in directory): 
-                deform_yes.append(image_resized)
+                deform_yes_train.append(image_resized)
             else:
-                deform_no.append(image_resized)
+                deform_no_train.append(image_resized)
+
+    # Now testing:
+    for directory in test_data:
+        for im in os.listdir(directory):
+            if ('DS_Store' in im or '.txt' in im): continue
+            image = cv2.imread(directory+'/'+im, cv2.IMREAD_GRAYSCALE)
+            image_resized = cv2.resize(image, 
+                                       (height,width), 
+                                       interpolation=cv2.INTER_LINEAR)
+            if ('deformed' in directory): 
+                deform_yes_test.append(image_resized)
+            else:
+                deform_no_test.append(image_resized)
 
     # Balance the data and inspect sizes.
-    len_y, len_n = len(deform_yes), len(deform_no)
-    deform_yes = np.array(deform_yes)
-    deform_no = np.array(deform_no)
-    print("Resized data loaded.\n\tDeformed: {}\n\tNormal: {}".format(
-            deform_yes.shape, deform_no.shape))
-    indices_yes = np.random.choice(len_y, min(len_y, len_n), replace=False)
-    indices_no = np.random.choice(len_n, min(len_y, len_n), replace=False)
-    deform_yes = deform_yes[indices_yes]
-    deform_no = deform_no[indices_no]
-    print("With balanced data now.\n\tDeformed: {}\n\tNormal: {}".format(
-            deform_yes.shape, deform_no.shape))
+    len_y_tr, len_n_tr = len(deform_yes_train), len(deform_no_train)
+    len_y_te, len_n_te = len(deform_yes_test), len(deform_no_test)
+    deform_yes_train = np.array(deform_yes_train)
+    deform_no_train = np.array(deform_no_train)
+    deform_yes_test = np.array(deform_yes_test)
+    deform_no_test = np.array(deform_no_test)
+
+    print("Resized data loaded.")
+    print("\tTrain (+Valid) Deformed: {}\n\tTrain Normal: {}".format(
+            deform_yes_train.shape, deform_no_train.shape))
+    print("\tTest Deformed: {}\n\tTest Normal: {}".format(
+            deform_yes_test.shape, deform_no_test.shape))
+
+    indices_yes_tr = np.random.choice(len_y_tr, min(len_y_tr, len_n_tr), replace=False)
+    indices_no_tr = np.random.choice(len_n_tr, min(len_y_tr, len_n_tr), replace=False)
+    deform_yes_train = deform_yes_train[indices_yes_tr]
+    deform_no_train = deform_no_train[indices_no_tr]
+
+    indices_yes_te = np.random.choice(len_y_te, min(len_y_te, len_n_te), replace=False)
+    indices_no_te = np.random.choice(len_n_te, min(len_y_te, len_n_te), replace=False)
+    deform_yes_test = deform_yes_test[indices_yes_te]
+    deform_no_test = deform_no_test[indices_no_te]
+
+    print("With balanced data now.")
+    print("\tTrain (+Valid) Deformed: {}\n\tTrain Normal: {}".format(
+            deform_yes_train.shape, deform_no_train.shape))
+    print("\tTest (+Valid) Deformed: {}\n\tTest Normal: {}".format(
+            deform_yes_test.shape, deform_no_test.shape))
 
     # Combine into one dataset and create labels: 0=NORMAL, 1=DEFORMED. 
-    all_data = np.concatenate((deform_yes, deform_no))
-    all_labels = np.concatenate((np.ones(deform_yes.shape[0]),
-                                 np.zeros(deform_no.shape[0])))
-    print("All the data together now.\n\tData: {}\n\tLabels: {}".format(
-            all_data.shape, all_labels.shape))
+    all_train_data = np.concatenate((deform_yes_train, deform_no_train))
+    all_test_data = np.concatenate((deform_yes_test, deform_no_test))
+    all_train_labels = np.concatenate((np.ones(deform_yes_train.shape[0]),
+                                       np.zeros(deform_no_train.shape[0])))
+    all_test_labels = np.concatenate((np.ones(deform_yes_test.shape[0]),
+                                      np.zeros(deform_no_test.shape[0])))
+    print("Train data together now.\n\tData: {}\n\tLabels: {}".format(
+            all_train_data.shape, all_train_labels.shape))
+    print("Test data together now.\n\tData: {}\n\tLabels: {}".format(
+            all_test_data.shape, all_test_labels.shape))
 
     # Then shuffle & split. Use the same indices to keep data & labels matched.
-    N = all_data.shape[0]
+    N = all_train_data.shape[0]
     indices = np.random.permutation(N)
-
     indices_train = indices[ : int(N*ratios[0])]
-    indices_valid = indices[int(N*ratios[0]) : int(N*(ratios[0]+ratios[1]))]
-    indices_test  = indices[int(N*(ratios[0]+ratios[1])) : ]
+    indices_valid = indices[int(N*ratios[0]) : ]
 
-    X_train = all_data[indices_train].astype('float32')
-    y_train = all_labels[indices_train]
-    X_valid = all_data[indices_valid].astype('float32')
-    y_valid = all_labels[indices_valid]
-    X_test = all_data[indices_test].astype('float32')
-    y_test = all_labels[indices_test]
+    X_train = all_train_data[indices_train].astype('float32')
+    y_train = all_train_labels[indices_train]
+    X_valid = all_train_data[indices_valid].astype('float32')
+    y_valid = all_train_labels[indices_valid]
+
+    X_test = all_test_data.astype('float32')
+    y_test = all_test_labels
 
     print("X_train {}, y_train {}".format(X_train.shape, y_train.shape))
     print("X_valid {}, y_valid {}".format(X_valid.shape, y_valid.shape))
@@ -161,12 +199,23 @@ def load_and_save(data_dirs, ratios, height=32, width=32):
 
 
 if __name__ == "__main__":
-    data_dirs = ['data_raw/im_left_deformed',
-                 'data_raw/im_right_deformed',
-                 'data_raw/im_left_normal',
-                 'data_raw/im_right_normal']
+    data_dirs_train = ['data_raw_train/im_left_deformed',
+                       'data_raw_train/im_right_deformed',
+                       'data_raw_train/im_left_normal',
+                       'data_raw_train/im_right_normal']
+    data_dirs_test = ['data_raw_test/im_left_deformed',
+                      'data_raw_test/im_right_deformed',
+                      'data_raw_test/im_left_normal',
+                      'data_raw_test/im_right_normal']
     # once the data is clean, I don't need to run this method any more.
-    #sanity_checks(data_dirs)
+    #sanity_checks(data_dirs_train)
+    #sanity_checks(data_dirs_test)
+
     height, width = 32, 32
-    ratios = [0.75, 0.05, 0.20]
-    load_and_save(data_dirs, height=height, width=width, ratios=ratios)
+    train_valid_ratio = [0.90, 0.10]
+    load_and_save(train_data=data_dirs_train, 
+                  test_data=data_dirs_test, 
+                  ratios=train_valid_ratio,
+                  height=height, 
+                  width=width)
+    print("All done!")

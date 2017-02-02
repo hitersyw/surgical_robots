@@ -16,6 +16,10 @@ I'll explain each in turn.
 
 ## Getting the Data
 
+**Update February 1, 2017**: I used a third piece of gauze for a more truly
+held-out test set. The following two sets of gauzes now form entirely the
+training data.
+
 - I took two pieces of surgical gauze and saved lots of images manually. I
   altered the images gradually, so as to get more variation in the images.
   Alterations include more deformations, rotations, pushing/pulling the gauze to
@@ -44,7 +48,8 @@ I'll explain each in turn.
 ## Pre-Processing
 
 Next, run `python scripts/process_data.py` from the home directory of the
-repository. This will do the following main steps:
+repository. (Be careful about the file names, since I added in another one from
+the third gauze.) This will do the following main steps:
 
 - Check all images for size and height/width sanity checks.
 
@@ -66,4 +71,8 @@ repository. This will do the following main steps:
 Now this will use the training data from the last step to run a CNN classifier.
 Simply run `python scripts/run_network.py`, again from the home directory of the
 repository. It contains built-in code for data augmentation, and also code for
-plotting. The `networks` file contains stored weights.
+plotting. I am not, however, currently using data augmentation as my data is
+already artificially larger than it naturally is due to my data collection
+procedure.
+
+For later use in deployment, the `networks` file contains stored weights.
