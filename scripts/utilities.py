@@ -93,7 +93,7 @@ def test_davinci_patches():
     inspection is done on the non-centered, non-scaled, and non-resized data. 
     """
     outfile = "misc/"
-    patches = np.load("misc/patches_davinci.npy")
+    patches = np.load("misc/raw_patches.npy")
     print("Loaded patches of shape {}".format(patches.shape))
     for i in range(patches.shape[0]):
         cv2.imwrite(outfile+ "patch_" +str.zfill(str(i),3)+ ".jpg", patches[i])
