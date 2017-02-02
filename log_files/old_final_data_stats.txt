@@ -1,0 +1,14 @@
+UPDATE: This is now deprecated.
+
+Resized data loaded.
+	Deformed: (522, 32, 32)
+	Normal: (628, 32, 32)
+With balanced data now.
+	Deformed: (522, 32, 32)
+	Normal: (522, 32, 32)
+All the data together now.
+	Data: (1044, 32, 32)
+	Labels: (1044,)
+X_train (783, 32, 32), y_train (783,)
+X_valid (52, 32, 32), y_valid (52,)
+X_test (209, 32, 32), y_test (209,)
