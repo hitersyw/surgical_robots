@@ -164,3 +164,6 @@ contained inside the gauze.
 WAIT ... I forgot to zero-center the images. That might do it!! Also it looks
 like the camera image doesn't capture the full gauze ... that's interesting (and
 better for our purposes since we don't have to crop ourselves).
+
+UPDATE: yes, it was the lack of zero-centering that produced the nonsensical
+results earlier. Now I run it and the results make a lot of sense.
