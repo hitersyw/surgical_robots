@@ -27,6 +27,7 @@ import os
 # import theano.config.floatX = 'float32'
 from keras.models import load_model
 import utilities
+np.set_printoptions(suppress=True)
 
 
 class DavinciMaster:
@@ -41,6 +42,7 @@ class DavinciMaster:
 
         # Network loading (TODO file obviously has to change to be the correct one ...)
         self.model = load_model("networks/cnn_cifar_keras_style.h5")
+        print("Initialization note: successfully loaded in the CNN.\n")
 
         #========SUBSCRIBERS========#
         # image subscribers
@@ -94,11 +96,12 @@ class DavinciMaster:
         left_image_gray = utilities.rgb2gray(self.left_image)
         raw_size = (400,400)
         scaled_size = (32,32)
-        stride = 200
+        stride = 100
         patches, centroids = utilities.get_patches(left_image_gray, 
                                                    raw_size=raw_size,
                                                    scaled_size=scaled_size,
-                                                   stride=stride)
+                                                   stride=stride,
+                                                   save=True)
         sh0, sh1, sh2 = patches.shape
         patches = patches.reshape(sh0, sh1, sh2, 1) 
         patches /= 255
@@ -109,8 +112,19 @@ class DavinciMaster:
         # leanring environment, THEN manage logic about how fast and long we
         # want to run. Whew.
 
-        rospy.sleep(2)
-        if (self.lcounter == 2):
+        print("inside left_image_callback")
+        print("original image and grayscale shapes {} and {}".format(
+                self.left_image.shape, left_image_gray.shape))
+        print("raw_size {}, stride {}".format(raw_size, stride))
+        print("patches.shape = {}, centroids.shape = {}".format(
+                patches.shape, centroids.shape))
+        print("pred_probs.shape = {}, predictions.shape = {}".format(
+                pred_probs.shape, predictions.shape))
+        print("pred_probs:\n{}".format(pred_probs))
+        print("whew ... now let's sleep for a few seconds\n")
+
+        rospy.sleep(10)
+        if (self.lcounter == 1):
             rospy.signal_shutdown("all done")
 
 

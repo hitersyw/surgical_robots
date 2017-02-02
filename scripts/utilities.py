@@ -27,9 +27,9 @@ def keras_test():
     Y_test = np_utils.to_categorical(y_test, n_classes)
 
     model = load_model("networks/cnn_cifar_keras_style.h5")
-    #score = model.evaluate(X_test, Y_test, verbose=1)
-    #print("Test score: {}".format(score[0]))
-    #print("Test accuracy: {}".format(score[1]))
+    score = model.evaluate(X_test, Y_test, verbose=1)
+    print("Test score: {}".format(score[0]))
+    print("Test accuracy: {}".format(score[1]))
     predictions = model.predict(X_test, verbose=1)
     print(predictions.shape)
     print(np.argmax(predictions, axis=1))
@@ -40,8 +40,9 @@ def rgb2gray(rgb):
     return np.dot(rgb[...,:3], [0.299, 0.587, 0.114])
 
 
-def generate_patches(im, raw_size, scaled_size, stride):
-    """ Generates patches and centroids from an input image.
+def get_patches(im, raw_size, scaled_size, stride, save=False):
+    """ Generates patches and centroids from an input image. It also includes 
+    functionality to save the original-sized patches for manual inspection.
     
     Args:
         im: A **grayscale** image from the robot's camera, which I assume has
@@ -59,12 +60,15 @@ def generate_patches(im, raw_size, scaled_size, stride):
     """
     patches = []
     centroids = []
+    patches_original = []
     x,y = 0,0
     dx,dy = raw_size
     maxX,maxY = im.shape
   
     for x in range(0, maxX-dx, stride):
         for y in range(0, maxY-dy, stride):
+            if save:
+                patches_original.append(im[x:x+dx, y:y+dy])
             patch = cv2.resize(im[x:x+dx, y:y+dy],
                                scaled_size,
                                interpolation=cv2.INTER_LINEAR)
@@ -73,20 +77,20 @@ def generate_patches(im, raw_size, scaled_size, stride):
             cy = y + dy/2
             centroids.append(np.array([cx,cy]))
 
+    if save:
+        np.save("original_patches", np.array(patches_original))
     return np.array(patches), np.array(centroids)
 
 
 if __name__ == "__main__":
-    # keras test, it works
+    # keras test, it should work
     #keras_test()
 
-    # Some test cases here with patches.
-    im = rgb2gray(np.load("np_image/left0.npy"))
-    print("Loaded image with shape {}.".format(im.shape))
-    patches, centroids = generate_patches(im, 
-                                          raw_size=(100,100), 
-                                          scaled_size=(32,32), 
-                                          stride=100)
-    print(patches.shape)
-    print(centroids.shape)
-    print(centroids)
+    ## Some test cases here with patches.
+    #im = rgb2gray(np.load("np_image/left0.npy"))
+    #print("Loaded image with shape {}.".format(im.shape))
+    #patches, centroids = get_patches(im, 
+    #                                 raw_size=(100,100), 
+    #                                 scaled_size=(32,32), 
+    #                                 stride=100)
+    pass
