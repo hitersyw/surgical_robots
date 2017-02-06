@@ -10,7 +10,7 @@ The "endoscope" code seems to be in:
 
 The 'ros' startup script looks to be in /.ros and we can run that? That's where
 the frames were saved by default. When Sanjay started it, he was in the
-`~/.ros/log` dirctory and ran the following command:
+`~/.ros/log` directory and ran the following command:
 
 roslaunch gscam endoscope.launch
 
@@ -36,7 +36,8 @@ not, inside there.
 CLICK to save. I should probably do this for ONE of the left or right hand
 sides. The problem is that the left/right will override each other, each time I
 click on the left camera, it'll save starting from 0, but so will the right ...
-seems really bad design but maybe the images are the same.
+seems really bad design but maybe the images are the same. UPDATE: no they're
+not exactly the same, also we need both in order to measure depth correctly.
 
 (4) Change the gauze somehow (either deform it or start with a new one) and then
 take more pictures. Ways to change: 
@@ -50,7 +51,7 @@ take more pictures. Ways to change:
 Repeat this until I'm satisfied.
 
 By the way, we're only doing this with circle gauzes. It takes a lot of
-man-hours to manually generate datsets like these.
+man-hours to manually generate datasets like these.
 
 (5) Now copy those over to my directory and then I can work with these. I'll
 have to ssh probably, and DON'T INSTALL ANYTHING NEW WITHOUT USING VIRTUALENV.
@@ -61,7 +62,8 @@ By "work with these" I mean I'm taking these JPG images and applying various
 numpy array operations to deform them. Look at this online, there's tons of
 stuff. I'll also be using these on *patches* not necessarily the real images. Or
 think of bounding boxes? Lots of work has been done on that. Time to brainstorm
-this weekend.
+this weekend. UPDATE: no need for me to do data augmentation! There's plenty of
+images as it is and performance is great.
 
 
 
@@ -166,4 +168,97 @@ like the camera image doesn't capture the full gauze ... that's interesting (and
 better for our purposes since we don't have to crop ourselves).
 
 UPDATE: yes, it was the lack of zero-centering that produced the nonsensical
-results earlier. Now I run it and the results make a lot of sense.
+results earlier. Now I run it and the results make a lot of sense. =)
+
+
+
+Friday, February 3, 2017
+
+Now what should I be doing? The ultimate goal ASAP is to be able to convert from
+a camera frame coordinate into an actual robot movement. For the actual robot
+movement, I think that needs the `robot` library but it doesn't seem to be
+installed on the computer I'm using and when I move the file there (according to
+GitHub tutorials) I'm getting `PyKDL not found` errors. It looks like the
+*other* computer uses that library ... I'm confused again, what's the role of
+these two computers?
+
+OK maybe it's best to just figure out the correct (x,y,z) location of a patch
+centroid, in terms of the robot frame. I think that's the critical part (then
+once we know the frame, just use `psm1.move_cartesian_frame(...)`).
+
+How to register these images with the robot frame? What's the difference between
+this task and what Sanjay did with the primitives he defined? I'm still
+
+I'm really confused. Let me just figure out a way to measure "disparity" among
+the left/right camera images on the chessboard.
+
+
+
+Monday, February 6, 2017
+
+Again, what should I be doing? I'm still confused and I think it would be a lot
+faster if someone else on the team did this since they'd be more familiar with
+the robot. Brijen sent me an email about a camera calibration tutorial, but the
+cameras are already calibrated, right? I don't think I need to read this but
+maybe it will give more intuition.
+
+OK, after settling down a bit I read Sanjay's test script and it's actually
+based on Brijen's code so no need to worry, I'll read Sanjay's code. It's in
+the `dvrk_calibration` directory so don't forget! It collects data points using
+the usual rospy subscribers with `StereoChessboardCollect`. Then it will save
+points (25 of them, apparently) into `endoscope_pts.p`. These are "camera
+points" in the camera calibration.
+
+Then we run the **robot** calibration, which saves 25 points again into
+`PSM1.p`. This and the other one are 3-D points.
+
+I think if I need any more camera and/or robot points, I should re-run this
+code Sanjay has. However, it uses a specialized getCheckerBoardCorners() which
+... seems too specific to the method? How do we get camera points anyway? Are
+those simple pixels in which case it's not bad? Or do we collect from the
+robot's arm?
+
+So how about this, when dvrk is running and ready, in the rospy code:
+
+- Load in camera_matrix.p and robot_matrix.p. These should be pre-computed,
+  right? (And I should have some method which copies Sanjay's primitive.)
+
+- Then have a subscriber read in left/right images (of the full camera's view),
+  this is what I had before.
+
+- Then have those two images split into patches and centroids, and extract the
+  2-D **camera** point of each centroid. Is this as simple as taking the numpy
+  array of pixels and finding the row and column index? I will have to ask
+  someone.
+
+- Then use the _get_points_3d(left,right) where left=row index, right=column
+  index to find the 3-D point, which we then input to camera2robot to find the
+  corresponding robot frame.
+
+- Then (somewhere else, on other computer?) use the real robot code to command
+  it to move to those robot points. (Where does the TRPO algorithm go?)
+
+I hope this is right ...
+
+EDIT: Argh, we really have to be consistent in how high we're setting the gauze.
+I think it's there on the Stewart platform. So maybe be consistent: put the
+gauze and its clippers and plastic circle and put it on top of a Stewart
+platform which is pushed down completely with three nails holding it in place. I
+hope this won't adversely affect the network's performance. By the way, for
+lighting, I've always had it at 40%.
+
+For height, I'm using the smallest chessboard piece and putting it on top of
+some loose substance to get it equal to the clipper+plastic supports. Whew.
+Let's try that (but don't overwrite the current stuff).
+
+OH ok I can get findChessboardCorners(...) to work on the larger chessboard,
+**assuming** that it's not too high up. I had to discard the Stewart platform.
+Now I'm getting stuff that indeed looks like pixel values. With a (6,6) chess
+board, you have to provide a (5,5) pairing which subtracts one, since we're only
+interested in finding the corners.
+
+Yes, I get pixels there ... but they are not aligned with the actual locations?
+For both the left/right, the actual coordinates I'm getting from
+`findChessboardCorners` do not align with the actual corners? It looks like I
+could get them to do so by translating them somehow ... anyway I will have to
+figure this out later.
