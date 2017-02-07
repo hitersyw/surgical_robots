@@ -262,3 +262,6 @@ For both the left/right, the actual coordinates I'm getting from
 `findChessboardCorners` do not align with the actual corners? It looks like I
 could get them to do so by translating them somehow ... anyway I will have to
 figure this out later.
+
+UPDATE: As suggested by Carolyn, let me try and switch the coordinates a bit. I
+will do that tomorrow when there's fewer people here.
