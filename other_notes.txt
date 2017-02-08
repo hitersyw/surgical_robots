@@ -265,3 +265,36 @@ figure this out later.
 
 UPDATE: As suggested by Carolyn, let me try and switch the coordinates a bit. I
 will do that tomorrow when there's fewer people here.
+
+
+
+Wednesday, February 8, 2017
+
+PICK UP THE PACE! PICK UP THE PACE!!
+
+OK I don't think I have to do camera calibration, according to Sanjay. Well, I
+hope not! What are the objectives for today, then?? 
+
+Figure out once and for all the final configuration for the board, right? I took
+a picture and will send it.
+
+Let's do the following today:
+
+(1) Figure out how to re-do camera and robot matrices at the given height.
+Sanjay did some but those were for a chessboard at the very bottom ... but I
+need the chessboard at the height of where the gauze will be located, which I
+assume is the flattened Stewart platform, with the gauze and its plastic
+"supporting circle" on top of it. Because different heights mean different
+matrices, correct?
+
+(2) Confirm that the movement is correct by looking at pixels and seeing their
+correct translation.
+
+(3) Then proceed with my original plan. With the robot/camera matrices set up,
+follow my procedure in step (3) to test that the robot can see the gauze clearly
+and when it extracts patches, that they are aligned.
+
+Let's not worry about running a reinforcement learning algorithm today.
+
+Two and half hours later ... I can finally get the chessboard set up at the
+correct height. Whew ... and I took picture so I remember the setup somewhat.
