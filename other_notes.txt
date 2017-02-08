@@ -298,3 +298,34 @@ Let's not worry about running a reinforcement learning algorithm today.
 
 Two and half hours later ... I can finally get the chessboard set up at the
 correct height. Whew ... and I took picture so I remember the setup somewhat.
+
+I tried running the rest of the code, but it turns out that Sanjay's code runs a
+GUI. So I don't know how to use it.
+
+(After some discussion) ... and after all that, I don't actually have to change
+the matrix. Don't touch his camera and robot matrices ... those should be set.
+Keep the Stewart Platform locked down where it is now, with two nails holding it
+in place (the third for some reason isn't there). The only thing I should worry
+about is trying to get the pixels to match.
+
+My confusion is that I thought the different height of the Stewart platform
+meant that we had to redo the camera and robot matrices. But we don't, so keep
+Sanjay's matrices. 
+
+The only thing that I should be worried about is how to translate stuff from
+(left camera) to (right camera) at a given height. This is because this
+disparity will change depending on which height we use, and Sanjay said that's
+the only way we can do this, we have to cheat otherwise the problem is
+intractable.
+
+It's easy to test: take that chessboard from the left image, apply some "linear
+algebra" solver to it, then I get the results in the right image. So if I
+overlay the two images or look at them, they should closely match on the order
+of several millimeters.
+
+Once we have that, then in practice, when dvrk sees patches of gauze, it should
+do that "translation" from left to right, so both patches are of the "right
+camera" view. Then we can do the camera->robot method and go from there.
+
+Well, even though this morning was "wasted", at least I learned a little bit
+about camera calibration, finding chessboard corners, etc.
