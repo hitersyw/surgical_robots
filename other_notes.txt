@@ -329,3 +329,12 @@ camera" view. Then we can do the camera->robot method and go from there.
 
 Well, even though this morning was "wasted", at least I learned a little bit
 about camera calibration, finding chessboard corners, etc.
+
+
+Monday, February 20, 2017
+
+Stay positive!!
+
+What do I need to do again? 
+
+Well, I sent Sanjay some math and hopefully that is something.
