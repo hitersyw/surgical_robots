@@ -188,6 +188,7 @@ once we know the frame, just use `psm1.move_cartesian_frame(...)`).
 
 How to register these images with the robot frame? What's the difference between
 this task and what Sanjay did with the primitives he defined? I'm still
+confused.
 
 I'm really confused. Let me just figure out a way to measure "disparity" among
 the left/right camera images on the chessboard.
@@ -333,8 +334,23 @@ about camera calibration, finding chessboard corners, etc.
 
 Monday, February 20, 2017
 
-Stay positive!!
-
-What do I need to do again? 
+Stay positive!! What do I need to do again? 
 
 Well, I sent Sanjay some math and hopefully that is something.
+
+
+Wednesday, March 1, 2017
+
+I'm going to go ahead with my plan to get the images to align. However, for that
+I will need to re-collect the chessboard points. See my LaTeX documentation. I
+also took pictures of the setup, just so I don't forget. I really should be
+doing that as much as needed.
+
+AH, looks like we have to run the command `roscore` on davinci0, which I assume
+is the computer on the right. Once I do that, then running the command on the
+computer to the left should not result in server errors, etc.
+
+With a new chessboard with 9x7 corners, I can detect the corners, meaning that
+there are now 63 points (not 25, as I have in my LaTeX writeup to everyone).
+
+Ugh, camera quality just plummeted. Huh?
