@@ -354,3 +354,45 @@ With a new chessboard with 9x7 corners, I can detect the corners, meaning that
 there are now 63 points (not 25, as I have in my LaTeX writeup to everyone).
 
 Ugh, camera quality just plummeted. Huh?
+
+UPDATE: never mind, it was a simple fix, just adjust the focus of the cameras.
+OK I am able to get it working, the map from left camera to right camera. Now
+let me vectorize this and then ... I'm not sure what is next? UPDATE: Yay, it's
+vectorized. The next step is to get this in a pipeline which the others can use.
+
+
+Friday, March 3, 2017
+
+Quick update: I managed to get a right-to-left mapping (in addition to my
+left-to-right one). So that's good. 
+
+Now, the big guns: let's try and get a _complete_pipeline_ working. That is,
+let's be able to run the subscriber and check that we can get the (center?)
+coordinates for each patch, and also measure the level of deformation. For the
+pipeline, run the davinci_master.py script. Be sure to use:
+
+    `source venv/bin/activate` 
+    
+to get the virtual environment working.
+
+It looks good ... so far. Maybe I should just explicitly draw the centers? That
+might be better.
+
+WAIT ... looking at the camera and the endoscope, the left camera's images
+should be tilted to the left of the right camera. I.e. left camera means image
+is to the left! But when I look at the saved checkerboard images from the
+calibration script (I modified it based on Sanjay's starter code), it's the
+opposite! Why? This will affect the result on the other stuff ... 
+
+OH ... it looks like the labels is wrong ... 
+
+Here's what I think: when I look at the image from the endoscope after running
+`roslaunch ...`, I see two camera images, saying `/endoscope/left/image_raw` or
+the same except `right` instead of `left`.  However, I think that's _wrong_.
+Because when I save things using the subscriber, the image with the label
+`right` image actually gets saved into the left image for the subscriber. So
+really, the left images are to the right now.  Ugh ... I better bring this up
+with someone. But it should not affect the code correctness.
+
+OK by the end of today I got something working ... but it's probably not working
+enough. =(
