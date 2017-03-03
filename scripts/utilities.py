@@ -38,7 +38,7 @@ def rgb2gray(rgb):
     return np.dot(rgb[...,:3], [0.299, 0.587, 0.114])
 
 
-def get_processed_patches(im, raw_size, scaled_size, stride, save=False):
+def get_processed_patches(im, raw_size, scaled_size, stride, save=False, left=True):
     """ Generates patches and centroids from an input image. It also includes 
     functionality to save the original-sized patches for manual inspection. The 
     patches and centroids that this returns should be processed so that the 
@@ -53,6 +53,8 @@ def get_processed_patches(im, raw_size, scaled_size, stride, save=False):
             patches, using the same linear interpolation from training. AND we 
             zero-center them here (which happens before dividing by 255).
         stride: The amount we skip when extracting new patches.
+        left: If true, we assume we're calling this from the left camera, which
+          affects the saved file name. Otherwise, the right image.
         
     Returns:
         A tuple consisting of: (1) a 4-D array of processed patches of size 
@@ -82,8 +84,11 @@ def get_processed_patches(im, raw_size, scaled_size, stride, save=False):
             centroids.append(np.array([cx,cy]))
 
     if save:
-        np.save("misc/full_image", im)
-        np.save("misc/raw_patches", np.array(patches_original))
+        prefix = "right_"
+        if left:
+            prefix = "left_"
+        np.save("misc/" +prefix+ "full_image", im)
+        np.save("misc/" +prefix+ "raw_patches", np.array(patches_original))
     patches = np.array(patches)
     sh0, sh1, sh2 = patches.shape
     patches = patches.reshape(sh0, sh1, sh2, 1)
@@ -91,17 +96,52 @@ def get_processed_patches(im, raw_size, scaled_size, stride, save=False):
     return patches, np.array(centroids)
 
 
-def test_davinci_patches():
+def test_davinci_patches(left=True):
     """ For testing patches seen by davinci and inspect performance. Don't call
     this while running davinci itself; do it after the experiment. Make sure the
-    inspection is done on the non-centered, non-scaled, and non-resized data. 
+    inspection is done on the non-centered, non-scaled, and non-resized data.
+    UPDATE: we can also use this to test the assocation between the left camera
+    and right camera coordinate frames.
     """
-    outfile = "misc/"
-    patches = np.load("misc/raw_patches.npy")
+
+    prefix="right"
+    other="left"
+    if left:
+        prefix="left"
+        other="right"
+
+    # Load stuff .
+    patches = np.load("misc/" +prefix+ "_raw_patches.npy")
+    centroids = np.load("misc/" +prefix+ "_centroids.npy")
+    mapping_centroids = np.load("misc/" +prefix+ "_to_" +other+ "_centroids.npy")
+    image = np.load("misc/" +prefix+ "_full_image.npy")
+    image_copy = np.copy(image) # For putting mapped centroids
     print("Loaded patches of shape {}".format(patches.shape))
+    cv2.imwrite("misc/" +prefix+ "_full_image.jpg", image)
+
+    # First, let's create the patches themselves.
     for i in range(patches.shape[0]):
-        cv2.imwrite(outfile+ "patch_" +str.zfill(str(i),3)+ ".jpg", patches[i])
-    cv2.imwrite(outfile+ "fullimg.jpg", np.load("misc/full_image.npy"))
+        cv2.imwrite("misc/patches/" +prefix+ "_patch_" +str.zfill(str(i),3)+ ".jpg", patches[i])
+
+    # Now let's draw out the location of the centroids.
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    rectangle_i = 2000
+    for (index,pt) in enumerate(centroids):
+        x,y = int(round(pt[0])), int(round(pt[1]))
+        cv2.circle(image, (x,y), radius=4, color=(0,0,0), thickness=2)
+        cv2.putText(image, text=str(index), org=(x,y), fontFace=font, fontScale=0.8, color=(0,0,0), thickness=2)
+        if (index == rectangle_i):
+            cv2.rectangle(image, (x-200,y-200), (x+200,y+200), (255,255,0), 2)
+    cv2.imwrite("misc/" +prefix+ "_full_image_centroids.jpg", image)
+    for (index,pt) in enumerate(mapping_centroids):
+        x,y = int(round(pt[0])), int(round(pt[1]))
+        cv2.circle(image_copy, (x,y), radius=4, color=(0,0,0), thickness=2)
+        cv2.putText(image_copy, text=str(index), org=(x,y), fontFace=font, fontScale=0.8, color=(0,0,0), thickness=2)
+        if (index == rectangle_i):
+            print("inside special index, x={},  y={}, prefix={}".format(x,y,prefix))
+            cv2.rectangle(image_copy, (x-200,y-200), (x+200,y+200), (255,255,0), 2)
+    cv2.imwrite("misc/" +prefix+ "_full_image_centroids_to_" +other+ ".jpg", image_copy)
+   
 
 
 if __name__ == "__main__":
@@ -117,5 +157,5 @@ if __name__ == "__main__":
     #                                 stride=100)
 
     # Test the patches found from davinci (requires file outside of github).
-    test_davinci_patches()
-    pass
+    test_davinci_patches(left=True)
+    test_davinci_patches(left=False)
