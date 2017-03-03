@@ -40,9 +40,10 @@ class DavinciMaster:
         self.info = {'l': None, 'r': None}
         self.bridge = cv_bridge.CvBridge()
 
-        # Network loading (TODO file obviously has to change to be the correct one ...)
+        # Load network and other information.
         self.model = load_model("networks/cnn_cifar_keras_style.h5")
-        print("Initialization note: successfully loaded in the CNN.\n")
+        self.left_to_right = np.load("calibration_stuff/left_to_right_3x2.npy")
+        self.right_to_left = np.load("calibration_stuff/right_to_left_3x2.npy")
 
         #========SUBSCRIBERS========#
         # image subscribers
@@ -85,32 +86,26 @@ class DavinciMaster:
 
 
     def left_image_callback(self, msg):
+        """ 
+        Uses the utility methods to get processed patches, which can be directly 
+        classified using a neural network. 
+        """
         if rospy.is_shutdown():
             return
         self.left_image = self.bridge.imgmsg_to_cv2(msg, "rgb8")
         self.lcounter += 1
 
-        # TODO this is going to be in flux depending on what we do. Later, I'll
-        # put these as class properties or offload to shared methods.
-
         left_image_gray = utilities.rgb2gray(self.left_image)
         raw_size = (400,400)
         scaled_size = (32,32)
         stride = 100
-        patches, centroids = utilities.get_patches(left_image_gray, 
-                                                   raw_size=raw_size,
-                                                   scaled_size=scaled_size,
-                                                   stride=stride,
-                                                   save=True)
-        sh0, sh1, sh2 = patches.shape
-        patches = patches.reshape(sh0, sh1, sh2, 1) 
-        patches /= 255 # OK to do this since it's **after** zero-centering
+        patches, centroids = utilities.get_processed_patches(left_image_gray, 
+                                                             raw_size=raw_size,
+                                                             scaled_size=scaled_size,
+                                                             stride=stride,
+                                                             save=True)
         pred_probs = self.model.predict(patches)
         predictions = np.argmax(pred_probs, axis=1)
-
-        # TODO then we have to use these patches somehow in a reinforcement
-        # leanring environment, THEN manage logic about how fast and long we
-        # want to run. Whew.
 
         print("inside left_image_callback")
         print("original image and grayscale shapes {} and {}".format(

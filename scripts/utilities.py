@@ -38,12 +38,12 @@ def rgb2gray(rgb):
     return np.dot(rgb[...,:3], [0.299, 0.587, 0.114])
 
 
-def get_patches(im, raw_size, scaled_size, stride, save=False):
+def get_processed_patches(im, raw_size, scaled_size, stride, save=False):
     """ Generates patches and centroids from an input image. It also includes 
-    functionality to save the original-sized patches for manual inspection. Note
-    also that we do NOT scale (divide by 255) here, nor do we zero-center. That
-    comes outside of this code, and means I we directly look at patches_original
-    to inspect images.
+    functionality to save the original-sized patches for manual inspection. The 
+    patches and centroids that this returns should be processed so that the 
+    davinci code can _directly_ call the keras code on it. That means we zero
+    mean and divide by 255 here, along with reshaping for keras.
     
     Args:
         im: A **grayscale** image from the robot's camera, which I assume has
@@ -55,10 +55,10 @@ def get_patches(im, raw_size, scaled_size, stride, save=False):
         stride: The amount we skip when extracting new patches.
         
     Returns:
-        A tuple consisting of: (1) a 3-D array of patches of size (N,d1,d2)
-        where (d1,d2)=scaled_size, and (2) an array of centroids of size (N,2)
-        where the second axis represents the centroid, with coordinates rounded
-        to the nearest integer.
+        A tuple consisting of: (1) a 4-D array of processed patches of size 
+        (N,d1,d2,1), where (d1,d2)=scaled_size, and (2) an array of centroids 
+        of size (N,2) where the second axis represents the centroid, with 
+        coordinates rounded to the nearest integer.
     """
     patches = []
     centroids = []
@@ -84,7 +84,11 @@ def get_patches(im, raw_size, scaled_size, stride, save=False):
     if save:
         np.save("misc/full_image", im)
         np.save("misc/raw_patches", np.array(patches_original))
-    return np.array(patches), np.array(centroids)
+    patches = np.array(patches)
+    sh0, sh1, sh2 = patches.shape
+    patches = patches.reshape(sh0, sh1, sh2, 1)
+    patches /= 255 
+    return patches, np.array(centroids)
 
 
 def test_davinci_patches():
