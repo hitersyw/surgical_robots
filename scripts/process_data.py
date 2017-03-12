@@ -213,21 +213,21 @@ if __name__ == "__main__":
     data_dirs_train = ['data_raw_train/im_left_deformed',
                        'data_raw_train/im_left_deformed_hard',
                        'data_raw_train/im_left_normal',
-                       'data_raw_train/im_left_normal_hard']
-                       # 'data_raw_train/im_right_deformed',
-                       # 'data_raw_train/im_right_normal'
+                       'data_raw_train/im_left_normal_hard',
+                       'data_raw_train/im_right_deformed',
+                       'data_raw_train/im_right_normal']
     data_dirs_test = ['data_raw_test/im_left_deformed',
                       'data_raw_test/im_left_deformed_hard',
                       'data_raw_test/im_left_normal',
-                      'data_raw_test/im_left_normal_hard']
-                      # 'data_raw_test/im_right_deformed',
-                      # 'data_raw_test/im_right_normal'
+                      'data_raw_test/im_left_normal_hard',
+                      'data_raw_test/im_right_deformed',
+                      'data_raw_test/im_right_normal']
     # once the data is clean, I don't need to run this method any more.
     sanity_checks(data_dirs_train)
     sanity_checks(data_dirs_test)
 
     height, width = 32, 32
-    train_valid_ratio = [0.90, 0.10]
+    train_valid_ratio = [0.98, 0.02]
     load_and_save(train_data=data_dirs_train, 
                   test_data=data_dirs_test, 
                   ratios=train_valid_ratio,
