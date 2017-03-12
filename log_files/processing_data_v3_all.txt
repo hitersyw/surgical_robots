@@ -1,0 +1,252 @@
+
+
+KEY = data_raw_train/im_right_normal with 327 images:
+	mean [ 306.6116208   322.85626911]
+	min [188 202]
+	max [444 448]
+	std [ 41.09531235  38.71894512]
+
+now dimension ratios:
+	mean 0.9526
+	min 0.6188
+	max 1.2500
+	std 0.0934
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []
+
+
+KEY = data_raw_train/im_left_normal_hard with 95 images:
+	mean [ 326.58947368  333.24210526]
+	min [242 270]
+	max [394 418]
+	std [ 30.19776734  28.3172686 ]
+
+now dimension ratios:
+	mean 0.9808
+	min 0.8722
+	max 1.1322
+	std 0.0550
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []
+
+
+KEY = data_raw_train/im_left_deformed with 262 images:
+	mean [ 354.67938931  381.38931298]
+	min [168 152]
+	max [580 592]
+	std [ 77.68371647  73.94588206]
+
+now dimension ratios:
+	mean 0.9361
+	min 0.6000
+	max 1.3667
+	std 0.1416
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []
+
+
+KEY = data_raw_train/im_left_normal with 289 images:
+	mean [ 314.71280277  333.70934256]
+	min [198 178]
+	max [424 466]
+	std [ 34.35219392  35.63402911]
+
+now dimension ratios:
+	mean 0.9453
+	min 0.7753
+	max 1.1948
+	std 0.0666
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []
+
+
+KEY = data_raw_train/im_left_deformed_hard with 37 images:
+	mean [ 316.59459459  347.24324324]
+	min [206 266]
+	max [388 408]
+	std [ 39.54023572  30.75395418]
+
+now dimension ratios:
+	mean 0.9102
+	min 0.7500
+	max 1.0374
+	std 0.0660
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []
+
+
+KEY = data_raw_train/im_right_deformed with 260 images:
+	mean [ 366.01538462  390.03076923]
+	min [222 236]
+	max [520 518]
+	std [ 47.75933008  47.4380468 ]
+
+now dimension ratios:
+	mean 0.9399
+	min 0.6736
+	max 1.1398
+	std 0.0692
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []
+
+
+KEY = data_raw_test/im_left_normal with 37 images:
+	mean [ 377.18918919  395.51351351]
+	min [316 318]
+	max [436 454]
+	std [ 25.02953697  30.10398341]
+
+now dimension ratios:
+	mean 0.9561
+	min 0.8169
+	max 1.0698
+	std 0.0559
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []
+
+
+KEY = data_raw_test/im_left_normal_hard with 14 images:
+	mean [ 348.28571429  355.71428571]
+	min [290 316]
+	max [390 394]
+	std [ 26.23908908  27.55625045]
+
+now dimension ratios:
+	mean 0.9822
+	min 0.8631
+	max 1.1438
+	std 0.0776
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []
+
+
+KEY = data_raw_test/im_left_deformed_hard with 6 images:
+	mean [ 324.66666667  368.        ]
+	min [264 306]
+	max [374 428]
+	std [ 42.15315989  39.42926155]
+
+now dimension ratios:
+	mean 0.8855
+	min 0.7005
+	max 1.0054
+	std 0.0981
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []
+
+
+KEY = data_raw_test/im_right_deformed with 30 images:
+	mean [ 326.73333333  349.93333333]
+	min [234 288]
+	max [372 392]
+	std [ 26.59565545  23.16597121]
+
+now dimension ratios:
+	mean 0.9345
+	min 0.8103
+	max 1.0629
+	std 0.0614
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []
+
+
+KEY = data_raw_test/im_left_deformed with 33 images:
+	mean [ 333.03030303  354.54545455]
+	min [258 264]
+	max [398 430]
+	std [ 30.29999985  29.95460293]
+
+now dimension ratios:
+	mean 0.9405
+	min 0.7802
+	max 1.0370
+	std 0.0562
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []
+
+
+KEY = data_raw_test/im_right_normal with 25 images:
+	mean [ 341.6   367.12]
+	min [288 300]
+	max [398 414]
+	std [ 24.23881185  30.00309317]
+
+now dimension ratios:
+	mean 0.9337
+	min 0.8039
+	max 1.0500
+	std 0.0658
+
+special images to detect:
+large height: []
+large width: []
+high ratio: []
+low ratio: []
+Resized data loaded.
+	Train (+Valid) Deformed: (559, 32, 32)
+	Train Normal: (711, 32, 32)
+	Test Deformed: (69, 32, 32)
+	Test Normal: (76, 32, 32)
+With balanced data now.
+	Train (+Valid) Deformed: (559, 32, 32)
+	Train Normal: (559, 32, 32)
+	Test (+Valid) Deformed: (69, 32, 32)
+	Test Normal: (69, 32, 32)
+Train data together now.
+	Data: (1118, 32, 32)
+	Labels: (1118,)
+Test data together now.
+	Data: (138, 32, 32)
+	Labels: (138,)
+X_train (1095, 32, 32), y_train (1095,)
+X_valid (23, 32, 32), y_valid (23,)
+X_test (138, 32, 32), y_test (138,)
+Saving the mean (shape = (32, 32)) ...
+min, max X_train = -160.781738281, 103.283111572
+min, max X_valid = -144.344299316, 100.531509399
+min, max X_test = -155.562561035, 102.9296875
+All done!
