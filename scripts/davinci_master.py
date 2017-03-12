@@ -136,16 +136,18 @@ class DavinciMaster:
     return points_3d
 
 
-  def predict_left_camera_images(self):
+  def predict_left_camera_images(self, save=False):
     """ 
     Uses the utility methods to get processed patches, which can be directly 
-    classified using a neural network. 
+    classified using a neural network.  If save=True, save stuff into numpy 
+    arrays so Sanjay can use them later.
+    NOTE: index 0 is considered normal, index 1 is deformed.
     """
     print("inside left camera images prediction method")
     left_image_gray = utilities.rgb2gray(self.left_image)
-    raw_size = (100,100)
+    raw_size = (400,400)
     scaled_size = (32,32)
-    stride = 100
+    stride = 200
     patches, centroids = utilities.get_processed_patches(left_image_gray, 
                                                          raw_size=raw_size,
                                                          scaled_size=scaled_size,
@@ -156,6 +158,7 @@ class DavinciMaster:
     predictions = np.argmax(pred_probs, axis=1)
     print("pred_probs.shape = {}".format(pred_probs.shape))
     for row in range(pred_probs.shape[0]):
+      # only print deformed stuff
       if (pred_probs[row,1] > pred_probs[row,0]):
         print("predictions in row {}: {}".format(row, pred_probs[row,:]))
 
@@ -178,8 +181,16 @@ class DavinciMaster:
     print("centers_left.shape = {}, centers_right.shape = {}".format(centers_left.shape, centers_right.shape))
 
     # Thus, now do camera --> robot.
+    rpoints = np.zeros(cpoints.shape)
     for i,c in enumerate(cpoints):
-      print("point {}, predicted robot point = {}".format(i, self.camera2robot(c.T).T))
+      rpt = self.camera2robot(c.T).T
+      print("point {}, predicted robot point = {}".format(i, rpt))
+      rpoints[i,:] = rpt
+    
+    # Save stuff: pred_probs should be (N,2) and rpoints should be (N,3) where N = number of patches.
+    if save:
+      np.save("patch_pred_prob", pred_probs)
+      np.save("patch_pred_robot_pts", rpoints)
 
 
   def camera2robot(self, u):
@@ -194,6 +205,6 @@ class DavinciMaster:
 
 
 if __name__ == "__main__":
-    a = DavinciMaster()
-    rospy.sleep(2) # Sanjay had this here, not sure why
-    a.predict_left_camera_images() # well, it does everything basically =)
+  a = DavinciMaster()
+  rospy.sleep(2) # Sanjay had this here, not sure why
+  a.predict_left_camera_images(save=True) # well, it does everything basically =)

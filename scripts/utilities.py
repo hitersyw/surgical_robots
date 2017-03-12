@@ -53,6 +53,8 @@ def get_processed_patches(im, raw_size, scaled_size, stride, save=False, left=Tr
             patches, using the same linear interpolation from training. AND we 
             zero-center them here (which happens before dividing by 255).
         stride: The amount we skip when extracting new patches.
+        save: If true, save the full image and the raw patches, in numpy format,
+            i.e. not as images we can interpret.
         left: If true, we assume we're calling this from the left camera, which
           affects the saved file name. Otherwise, the right image.
         
@@ -158,4 +160,4 @@ if __name__ == "__main__":
 
     # Test the patches found from davinci (requires file outside of github).
     test_davinci_patches(left=True)
-    test_davinci_patches(left=False)
+    #test_davinci_patches(left=False)
