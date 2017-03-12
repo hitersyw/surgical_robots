@@ -79,7 +79,8 @@ def sanity_checks(data_dirs):
 def load_and_save(train_data, test_data, ratios, height=32, width=32):
     """ Now actually load the data into the numpy arrays. It's a bit sloppy
     since I modified this on short notice to handle an entirely new held-out
-    testing set.
+    testing set. Also, remember that normal probabilities come FIRST, then
+    deformed probabilities.
     
     Specifically:
         - Load the images using cv2 in grayscale.
@@ -91,6 +92,9 @@ def load_and_save(train_data, test_data, ratios, height=32, width=32):
           three batches of data according to the TRAINING data's statistics.
           This should be the standard way to normalize.
         - Then save into numpy arrays.
+
+    Note: detection of deformed/non-deformed happens with deformed in the
+    directory name.
     """
     assert (len(ratios) == 2) and (np.sum(ratios) == 1)
     deform_yes_train = []
@@ -207,16 +211,20 @@ def load_and_save(train_data, test_data, ratios, height=32, width=32):
 
 if __name__ == "__main__":
     data_dirs_train = ['data_raw_train/im_left_deformed',
-                       'data_raw_train/im_right_deformed',
+                       'data_raw_train/im_left_deformed_hard',
                        'data_raw_train/im_left_normal',
-                       'data_raw_train/im_right_normal']
+                       'data_raw_train/im_left_normal_hard']
+                       # 'data_raw_train/im_right_deformed',
+                       # 'data_raw_train/im_right_normal'
     data_dirs_test = ['data_raw_test/im_left_deformed',
-                      'data_raw_test/im_right_deformed',
+                      'data_raw_test/im_left_deformed_hard',
                       'data_raw_test/im_left_normal',
-                      'data_raw_test/im_right_normal']
+                      'data_raw_test/im_left_normal_hard']
+                      # 'data_raw_test/im_right_deformed',
+                      # 'data_raw_test/im_right_normal'
     # once the data is clean, I don't need to run this method any more.
-    #sanity_checks(data_dirs_train)
-    #sanity_checks(data_dirs_test)
+    sanity_checks(data_dirs_train)
+    sanity_checks(data_dirs_test)
 
     height, width = 32, 32
     train_valid_ratio = [0.90, 0.10]
