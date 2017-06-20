@@ -1,0 +1,56 @@
+(These are notes for my new project, one for debridement simulation
+incorporating learning.)
+
+**************************
+* Tuesday, June 20, 2017 *
+**************************
+
+Back to surgical robots, this time trying to understand that "second computer,"
+with the help of Sanjay.
+
+Log into the `davinci0` machine. I know the password.
+
+Open terminal, run `roscore`. No red error messages. Create new tab, `./teleop`.
+Then we get a `dvrk_console_json`. That's an interface. Click on "Home" then the
+fans go on, see things move, wait until messages stop. After that, press on
+"Teleop". Touch the robot, it WON'T MOVE. To move, click on the top button of
+the arms. 
+
+Look at `rostopic list`, lists the ROS "topics." Stuff that's getting published
+from the robot. PSM1 is our right, if we are facing the robot from the front. I
+can do
+
+`rostopic echo /dvrk/PSM1/position_current...`
+
+and it will continually print out the position, and we can move it and it will
+keep updating.
+
+To understand end effector state, look at the 6-D coordinate with
+(x,y,z,yaw,pitch,roll). We can also convert that to "joint angle" which is a
+second way of understanding the robot state. It's 7-D, and the joint angle is
+much easier to understand for machine learning. But we can translate, it's
+one-to-one for dvrk under some situations, not always because the end effector
+pose can be changed by keeping it constant and just moving the arms.
+
+In the tab, PSM1 IO, we can look at "current feedback" and that might be a
+threshold, if that value is above some quantity, then I know there is some load,
+and that the end effector (i.e. the gripper) is on contact with something. That
+`dvrk_console_json` was written by Sanjay, that's why we like to use that second
+computer. I use the first one for cameras, but we can also use the cameras on
+the same computer ... maybe that's better.
+
+See `dvrk-helloworld` on the computer for an example. Use `robot.py` and ensure
+that I'm import it and using it as needed.
+
+Look at the `BerkeleyAutomation` GitHub at `dvrk_docs`. That should be very
+helpful, mostly written by Sid.
+
+Dimensions:
+
+    x to the window
+    y to the wall (when facing dvrk)
+    z up in the air
+
+Careful with numbers. They are in **meters**, not centimeters.
+
+Don't keep the robot on when I'm not around (e.g. overnight).

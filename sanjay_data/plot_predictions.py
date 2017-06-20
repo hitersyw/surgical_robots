@@ -47,10 +47,10 @@ deformed = [
     [(1,5), (3,3), (3,4), (4,3), (4,4), (2,8), (3,8)], # 14 and 30/31/39/40 and 26/35
     [(1,5), (2,4), (2,5), (2,6), (3,5), (4,2), (0,8)], # 14/22/23/24/32 and 38 and 8
     [(0,3), (0,4), (1,3), (1,4), (2,3), (2,4)], # 3/4 and 12/13 and 21/22
-    [(2,4), (2,5), (2,6), (3,4), (3,5), (3,6)], # 22/23/24 and 31/32/33 (X0ofS)
+    [(2,4), (2,5), (2,6), (3,4), (3,5), (3,6)], # 22/23/24 and 31/32/33         (X0ofS)
     [(3,0), (4,0), (4,1), (2,6), (2,7), (3,6), (3,7), (4,6), (4,7)], # 27/26/37 and 24/25/33/34/42/43
     [(3,4), (3,5), (1,6), (1,7)], # 31/32 and 15/16
-    [(1,5), (2,4), (2,5), (2,6), (3,5)], # 14/22/23/24/32 (esaQA)
+    [(1,5), (2,4), (2,5), (2,6), (3,5)], # 14/22/23/24/32       (esaQA)
     [(3,2), (4,2), (4,3), (0,3), (0,4)], # 29/38/39 and 3/4 (there's other stuff but I don't *think* its deformed)
     [(4,1), (4,2), (4,3)], # 37/38/39
     [(0,6), (0,7), (1,6), (1,7), (3,3), (3,4)], # 6/7/15/16 and 31/32
@@ -74,16 +74,13 @@ def obtain_predictions():
         # will be using to compute final confidence predictions.
         all_perspectives = np.zeros((5,9,8))
         num_to_divide = np.zeros((5,9))
-    
-        # Not sure ??? From Sanjay.
-        index = 240
-    
+   
         # based on the perspective shifs (Daniel: must be because some shifts caused
-        # points to be out of the picture? I won't touch this.)
-        correction =[(0,0), (0,0), (0,0), (0,0), (0,0), (0,1), (1,1), (1, 0)]
+        # points to be out of the picture? I won't touch this. Use the first
+        # five if I don't want to have to worry about counts.)
+        correction = [(0,0), (0,0), (0,0), (0,0), (0,0), (0,1), (1,1), (1, 0)]
     
         for i in range(0,8):
-            index = index + 1
             data = np.load(ddir+"pred_prob"+str(i)+".npy")[:,1].reshape((5,9))
             assert data.shape == (5,9)
             print("index i={}, data=\n{}\n".format(i,data))
@@ -95,14 +92,21 @@ def obtain_predictions():
                     if newx < 5 and newy < 9:
                         all_perspectives[x,y,i] = data[newx, newy]
                         num_to_divide[x,y] += 1
+            print("all_perspectives[i]=\n{}\n".format(all_perspectives[:,:,i]))
     
-        # Order predictions by confidence for debugging purposes.
+        # Order predictions by confidence for debugging purposes. HERE is where
+        # we use the first (i.e. zeroth index) out of eight shifts.
         predictions = []
         for x in range(5):
             for y in range(9):
-                sum_probs = np.sum(all_perspectives[x,y,:])
-                avg_probs = sum_probs / num_to_divide[x,y]
-                predictions.append( (avg_probs, sum_probs, (x,y)) )
+                sums = np.sum(all_perspectives[x,y,:])
+                avgs = sums / num_to_divide[x,y]
+                onep = all_perspectives[x,y,0]
+                probs_filtered = np.sort(all_perspectives[x,y,:])[1:-1]
+                avgs_v2 = np.sum(probs_filtered) / (num_to_divide[x,y]-2) # remove top/bottom?
+                predictions.append( 
+                    (avgs, sums, (x,y), onep, avgs_v2)
+                )
         predictions.sort(reverse=True)
         for p in predictions:
             print p
@@ -124,8 +128,10 @@ def plot_precision_recalls(all_preds):
     max_num_cases = 5*9*len(all_preds)
     y_true = []
     y_scores = []
+    y_scores_f = []
 
-    # Elements in `preds` are tuples: (probability, sum of probabilities, [x,y]-coord).
+    # Elements in `preds` are tuples: 
+    #       (probability, sum of probabilities, [x,y]-coord, prob_only_first)
     for (index,preds) in enumerate(all_preds):
         for element in preds:
             
@@ -150,6 +156,7 @@ def plot_precision_recalls(all_preds):
                 continue
 
             y_scores.append(element[0])
+            y_scores_f.append(element[3])
             if (element[2] in deformed[index]):
                 y_true.append(1) # Positive case, deformed.
             else:
@@ -159,9 +166,11 @@ def plot_precision_recalls(all_preds):
         len(y_true), y_true.count(1), y_true.count(0)))
     assert len(y_true) <= max_num_cases
     precision, recall, thresholds = precision_recall_curve(y_true, y_scores, pos_label=1)
+    precision_f, recall_f, thresholds_f = precision_recall_curve(y_true, y_scores_f, pos_label=1)
     print(thresholds)
     print(len(thresholds))
     average_precision = average_precision_score(y_true, y_scores)
+    average_precision_f = average_precision_score(y_true, y_scores_f)
 
     plt.figure(figsize=(10,7))
     plt.title("Deformation Detector Precision-Recall", fontsize=30)
@@ -170,7 +179,9 @@ def plot_precision_recalls(all_preds):
     plt.xlim([0,1])
     plt.ylim([0,1])
     plt.plot(recall, precision, lw=4, color="blue", 
-             label="Precision-Recall (Area={:.4f})".format(average_precision))
+             label="[Eight] Precision-Recall (Area={:.4f})".format(average_precision))
+    plt.plot(recall_f, precision_f, lw=4, color="red", 
+             label="[One] Precision-Recall (Area={:.4f})".format(average_precision_f))
     plt.tick_params(axis='both', which='major', labelsize=21)
     plt.tick_params(axis='both', which='minor', labelsize=21)
     plt.legend(loc="lower left", prop={'size':23})

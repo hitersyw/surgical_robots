@@ -1,6 +1,13 @@
 Readme to help me understand stuff on this machine.
 -Daniel Seita
 
+**Update June 20, 2017**: this is for the computer that dealt with the camera. I
+was hoping to put this in much of our CASE 2017 submission, but the results were
+not good enough. I am going to try a second surgical robotics project, this time
+aiming for ICRA 2018 and with me taking the lead. I hope this works.
+
+--------------------------------------------------------------------------------
+
 This computer is for capturing images of the da vinci robot's camera. We can do
 a lot of stuff with that.
 
